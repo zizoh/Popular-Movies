@@ -1,4 +1,4 @@
-package com.zizohanto.popularmoviesapp;
+package com.zizohanto.popularmovies;
 
 import org.junit.Test;
 

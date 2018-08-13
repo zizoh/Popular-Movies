@@ -1,4 +1,4 @@
-package com.zizohanto.popularmoviesapp;
+package com.zizohanto.popularmovies;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

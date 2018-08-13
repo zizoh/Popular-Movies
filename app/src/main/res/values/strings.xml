@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Popular Movies App</string>
+    <string name="menu_filter">Filter</string>
+    <string name="refresh">Refresh</string>
+    <string name="nav_all">All</string>
+    <string name="nav_most_popular">Most Popular</string>
+    <string name="nav_highest_rated">Highest Rated</string>
+    <string name="movie_poster">Movie poster</string>
 </resources>

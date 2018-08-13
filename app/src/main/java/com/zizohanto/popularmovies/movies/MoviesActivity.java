@@ -1,14 +1,28 @@
-package com.zizohanto.popularmoviesapp;
+package com.zizohanto.popularmovies.movies;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-public class MainDisplayActivity extends AppCompatActivity {
+import com.zizohanto.popularmovies.R;
+import com.zizohanto.popularmovies.utils.ActivityUtils;
+
+public class MoviesActivity extends AppCompatActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.maindisplay_act);
+        setContentView(R.layout.movies_act);
+
+        MoviesFragment tasksFragment =
+                (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
+        if (tasksFragment == null) {
+            // Create the fragment
+            tasksFragment = MoviesFragment.newInstance();
+            ActivityUtils.addFragmentToActivity(
+                    getSupportFragmentManager(), tasksFragment, R.id.contentFrame);
+        }
     }
     /* Add Common Project Requirements */
     // TODO 1: Movies are displayed in the main layout via a grid of their corresponding movie
@@ -24,4 +38,7 @@ public class MainDisplayActivity extends AppCompatActivity {
     // TODO 7: When a movie poster thumbnail is selected, the movie details screen is launched.
     // TODO 8: In a background thread, app queries the /movie/popular or /movie/top_rated API for
     // the sort criteria specified in the settings menu.
+
+    // TODO 9: Remove API Key before sharing code publicly
+    // TODO 10: App does not crash when there is no network connection
 }
