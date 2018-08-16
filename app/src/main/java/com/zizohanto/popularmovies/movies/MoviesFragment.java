@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,10 +48,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         // Set up tasks view
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.rv_movies);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(layoutManager);
 
-        mMovieAdapter = new MovieAdapter(getActivity(), 10, this);
+        mMovieAdapter = new MovieAdapter(getActivity(), 20, this);
 
         recyclerView.setAdapter(mMovieAdapter);
 
