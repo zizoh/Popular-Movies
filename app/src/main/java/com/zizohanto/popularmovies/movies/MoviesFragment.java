@@ -1,5 +1,6 @@
 package com.zizohanto.popularmovies.movies;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,11 +18,17 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
+import com.zizohanto.popularmovies.data.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
+import com.zizohanto.popularmovies.utils.JsonUtils;
+
+import org.json.JSONException;
+
+import java.util.ArrayList;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener {
 
-
+    private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private MovieAdapter mMovieAdapter;
 
@@ -48,10 +55,12 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         // Set up tasks view
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.rv_movies);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 4);
+        GridLayoutManager layoutManager = new GridLayoutManager(mContext, 4);
         recyclerView.setLayoutManager(layoutManager);
 
-        mMovieAdapter = new MovieAdapter(getActivity(), 20, this);
+        mContext = getActivity();
+
+        mMovieAdapter = new MovieAdapter(mContext, 20, this);
 
         recyclerView.setAdapter(mMovieAdapter);
 
@@ -59,9 +68,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         final ScrollChildSwipeRefreshLayout swipeRefreshLayout =
                 (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
         swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(getActivity(), R.color.colorPrimary),
-                ContextCompat.getColor(getActivity(), R.color.colorAccent),
-                ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark)
+                ContextCompat.getColor(mContext, R.color.colorPrimary),
+                ContextCompat.getColor(mContext, R.color.colorAccent),
+                ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
         );
         // Set the scrolling view in the custom SwipeRefreshLayout.
         swipeRefreshLayout.setScrollUpChild(recyclerView);
@@ -75,7 +84,31 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         setHasOptionsMenu(true);
 
+        loadMovies();
+
         return root;
+    }
+
+    private void loadMovies() {
+        String[] moviesJSONResponse = mContext.getResources().getStringArray(R.array.popular_movies_details);
+        Movie movie = null;
+        ArrayList<Movie> moviesArray = new ArrayList<>();
+        for (String movieJSONResponse : moviesJSONResponse) {
+            try {
+                movie = JsonUtils.parseMovieJson(movieJSONResponse);
+            } catch (JSONException e) {
+                // TODO: Check there is no error parsing JSON without escaping apostrophe (')
+                e.printStackTrace();
+            }
+            if (movie == null) {
+                // TODO: Handle error
+                //closeOnError();
+                Toast.makeText(mContext, "E didn't work at position: " + String.valueOf(movieJSONResponse), Toast.LENGTH_LONG).show();
+            }
+            moviesArray.add(movie);
+        }
+
+        mMovieAdapter.setMovieData(moviesArray);
     }
 
     @Override
@@ -84,7 +117,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             case R.id.menu_filter:
                 break;
             case R.id.menu_refresh:
-                //mMovieAdapter.setMovieData(null);
+                loadMovies();
                 break;
         }
         return true;
@@ -96,7 +129,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     @Override
-    public void onMovieClick(int clickedMovieIndex) {
-        Toast.makeText(getActivity(), "Hello", Toast.LENGTH_SHORT).show();
+    public void onMovieClick(Movie clickedMovie) {
+        Toast.makeText(mContext, clickedMovie.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }
