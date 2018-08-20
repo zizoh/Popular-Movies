@@ -53,7 +53,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         View root = mMoviesFragBinding.getRoot();
 
         // Set up tasks view
-        RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.rv_movies);
+        // TODO: Check Fix of data binding in next line
+        RecyclerView recyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
 
         GridLayoutManager layoutManager = new GridLayoutManager(mContext, 4);
         recyclerView.setLayoutManager(layoutManager);
