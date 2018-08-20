@@ -1,7 +1,15 @@
-package com.zizohanto.popularmovies.data;
+package com.zizohanto.popularmovies.data.database;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+
+@Entity(tableName = "movies")
 public class Movie {
+    // TODO: Delete public to make class private
 
+    @PrimaryKey(autoGenerate = true)
+    public int mId;
     private String mTitle;
     private long mVoteAverage;
     private long mPopularity;
@@ -9,6 +17,18 @@ public class Movie {
     private String mPosterUrl;
     private String mPlotSynopsis;
 
+    public Movie(int id, String title, long voteAverage, long popularity, String releaseDate,
+                 String posterUrl, String plotSynopsis) {
+        mId = id;
+        mTitle = title;
+        mVoteAverage = voteAverage;
+        mPopularity = popularity;
+        mReleaseDate = releaseDate;
+        mPosterUrl = posterUrl;
+        mPlotSynopsis = plotSynopsis;
+    }
+
+    @Ignore
     public Movie(String title, long voteAverage, long popularity, String releaseDate,
                  String posterUrl, String plotSynopsis) {
         mTitle = title;
@@ -23,47 +43,24 @@ public class Movie {
         return mTitle;
     }
 
-    public void setTitle(String title) {
-        mTitle = title;
-    }
-
     public Number getVoteAverage() {
         return mVoteAverage;
-    }
-
-    public void setVoteAverage(long voteAverage) {
-        mVoteAverage = voteAverage;
     }
 
     public long getPopularity() {
         return mPopularity;
     }
 
-    public void setPopularity(long popularity) {
-        mPopularity = popularity;
-    }
-
     public String getReleaseDate() {
         return mReleaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        mReleaseDate = releaseDate;
     }
 
     public String getPosterUrl() {
         return mPosterUrl;
     }
 
-    public void setPosterUrl(String posterUrl) {
-        mPosterUrl = posterUrl;
-    }
-
     public String getPlotSynopsis() {
         return mPlotSynopsis;
     }
-
-    public void setPlotSynopsis(String plotSynopsis) {
-        mPlotSynopsis = plotSynopsis;
-    }
 }
+

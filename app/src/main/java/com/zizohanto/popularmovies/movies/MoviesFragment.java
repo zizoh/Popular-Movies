@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.Movie;
+import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
 import com.zizohanto.popularmovies.utils.JsonUtils;
 
