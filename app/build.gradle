@@ -22,13 +22,20 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // Support library
     implementation "com.android.support:appcompat-v7:$support_version"
     implementation "com.android.support:recyclerview-v7:$support_version"
     implementation "com.android.support:preference-v7:$support_version"
     implementation "com.android.support.constraint:constraint-layout:$constraint_layout_version"
+
+    // Image loading
     implementation "com.squareup.picasso:picasso:$picasso_version"
 
+    // Job scheduling
     implementation "com.firebase:firebase-jobdispatcher:$firebase_jobdispatcher_version"
+
+    // Architecture components
     implementation "android.arch.lifecycle:runtime:$arch_version"
     implementation "android.arch.lifecycle:extensions:$arch_version"
     annotationProcessor "android.arch.lifecycle:compiler:$arch_version"

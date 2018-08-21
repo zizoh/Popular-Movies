@@ -102,9 +102,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 e.printStackTrace();
             }
             if (movie == null) {
-                // TODO: Handle error
+                // TODO: Handle error and remove Toast
                 //closeOnError();
-                Toast.makeText(mContext, "E didn't work at position: " + String.valueOf(movieJSONResponse), Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "E didn't work at position: " +
+                        String.valueOf(movieJSONResponse), Toast.LENGTH_LONG).show();
             }
             moviesArray.add(movie);
         }
