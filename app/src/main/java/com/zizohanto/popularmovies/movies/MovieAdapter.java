@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.database.database.Movie;
+import com.zizohanto.popularmovies.data.database.Movie;
 
 import java.util.ArrayList;
 
