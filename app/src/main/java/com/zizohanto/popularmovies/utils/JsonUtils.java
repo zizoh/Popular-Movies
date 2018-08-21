@@ -1,6 +1,6 @@
 package com.zizohanto.popularmovies.utils;
 
-import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.database.Movie;
 
 import org.json.JSONException;
 import org.json.JSONObject;

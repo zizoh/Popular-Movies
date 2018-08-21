@@ -1,4 +1,4 @@
-package com.zizohanto.popularmovies.data.database;
+package com.zizohanto.popularmovies.data.database.database;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
