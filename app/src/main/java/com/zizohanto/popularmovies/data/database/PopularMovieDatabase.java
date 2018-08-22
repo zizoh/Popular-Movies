@@ -7,21 +7,21 @@ import android.content.Context;
 import android.util.Log;
 
 @Database(entities = {Movie.class}, version = 1)
-public abstract class MovieDatabase extends RoomDatabase {
+public abstract class PopularMovieDatabase extends RoomDatabase {
 
-    private static final String LOG_TAG = MovieDatabase.class.getSimpleName();
+    private static final String LOG_TAG = PopularMovieDatabase.class.getSimpleName();
     private static final String DATABASE_NAME = "movie";
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
-    private static MovieDatabase sInstance;
+    private static PopularMovieDatabase sInstance;
 
-    public static MovieDatabase getInstance(Context context) {
+    public static PopularMovieDatabase getInstance(Context context) {
         Log.d(LOG_TAG, "Getting the database");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
-                        MovieDatabase.class, MovieDatabase.DATABASE_NAME).build();
+                        PopularMovieDatabase.class, PopularMovieDatabase.DATABASE_NAME).build();
                 Log.d(LOG_TAG, "Made new database");
             }
         }

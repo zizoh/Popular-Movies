@@ -1,7 +1,8 @@
-package com.zizohanto.popularmovies.movies;
+package com.zizohanto.popularmovies.ui.movies;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,20 +13,19 @@ import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
-    private int mNumberItems;
-    private ArrayList<Movie> mMovies;
+    private List<Movie> mMovies;
     private Context mContext;
-
+    private MoviesFragment mMoviesFragment;
     private MovieItemClickListener mOnClickListener;
 
-    public MovieAdapter(Context context, int numberOfItems, MovieItemClickListener listener) {
+    public MovieAdapter(Context context, MoviesFragment fragment, MovieItemClickListener listener) {
         mContext = context;
-        mNumberItems = numberOfItems;
         mOnClickListener = listener;
+        mMoviesFragment = fragment;
     }
 
 
@@ -56,12 +56,54 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public int getItemCount() {
-        return mNumberItems;
+        if (null == mMovies) {
+            return 0;
+        } else {
+            return mMovies.size();
+        }
     }
 
-    public void setMovieData(ArrayList<Movie> movies) {
-        mMovies = movies;
-        notifyDataSetChanged();
+    public void setMovieData(List<Movie> newMovies) {
+        // If there was no forecast data, then recreate all of the list
+        if (mMovies == null) {
+            mMovies = newMovies;
+            notifyDataSetChanged();
+        } else {
+            /*
+             * Otherwise we use DiffUtil to calculate the changes and update accordingly. This
+             * shows the four methods you need to override to return a DiffUtil callback. The
+             * old list is the current list stored in mForecast, where the new list is the new
+             * values passed in from the observing the database.
+             */
+
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return mMovies.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newMovies.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return mMovies.get(oldItemPosition).getId() ==
+                            newMovies.get(newItemPosition).getId();
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    Movie newWeather = newMovies.get(newItemPosition);
+                    Movie oldWeather = newMovies.get(oldItemPosition);
+                    return newWeather.getId() == oldWeather.getId()
+                            && newWeather.getTitle().equals(oldWeather.getTitle());
+                }
+            });
+            mMovies = newMovies;
+            result.dispatchUpdatesTo(this);
+        }
     }
 
     public interface MovieItemClickListener {
@@ -85,7 +127,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         }
 
         private void bind(String posterUrl) {
-            //Toast.makeText(mContext, "Picasso baiby: " + posterUrl, Toast.LENGTH_SHORT).show();
             Picasso.with(mContext)
                     .load(posterUrl)
                     .into(mMoviePoster);

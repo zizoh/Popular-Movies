@@ -1,5 +1,7 @@
-package com.zizohanto.popularmovies.movies;
+package com.zizohanto.popularmovies.ui.movies;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -20,17 +22,18 @@ import android.widget.Toast;
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
-import com.zizohanto.popularmovies.utils.JsonUtils;
+import com.zizohanto.popularmovies.utils.InjectorUtils;
 
-import org.json.JSONException;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener {
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
+    private int mPosition = RecyclerView.NO_POSITION;
     private MovieAdapter mMovieAdapter;
+    private MoviesFragmentViewModel mViewModel;
+    private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
 
     public MoviesFragment() {
         // Requires empty public constructor
@@ -51,6 +54,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mMoviesFragBinding = DataBindingUtil.inflate(inflater, R.layout.movies_frag, container, false);
         View root = mMoviesFragBinding.getRoot();
+        mSwipeRefreshLayout =
+                (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
 
         // Set up tasks view
         // TODO: Check Fix of data binding in next line
@@ -61,56 +66,65 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mContext = getActivity();
 
-        mMovieAdapter = new MovieAdapter(mContext, 20, this);
+        mMovieAdapter = new MovieAdapter(mContext, this, this);
 
         recyclerView.setAdapter(mMovieAdapter);
 
-        // Set up progress indicator
-        final ScrollChildSwipeRefreshLayout swipeRefreshLayout =
-                (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
-        swipeRefreshLayout.setColorSchemeColors(
+        obtainViewModel();
+
+        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (movies != null && movies.size() != 0) {
+                    mMovieAdapter.setMovieData(movies);
+                    if (mPosition == RecyclerView.NO_POSITION) {
+                        mPosition = 0;
+                    } else {
+                        recyclerView.smoothScrollToPosition(mPosition);
+                    }
+                    MoviesFragment.this.setLoadingIndicator(false);
+                } else {
+                    MoviesFragment.this.setLoadingIndicator(true);
+                }
+            }
+        });
+
+        setProgressIndicator(recyclerView);
+
+        setHasOptionsMenu(true);
+
+        return root;
+    }
+
+    private void setProgressIndicator(RecyclerView recyclerView) {
+        mSwipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(mContext, R.color.colorPrimary),
                 ContextCompat.getColor(mContext, R.color.colorAccent),
                 ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
         );
         // Set the scrolling view in the custom SwipeRefreshLayout.
-        swipeRefreshLayout.setScrollUpChild(recyclerView);
+        mSwipeRefreshLayout.setScrollUpChild(recyclerView);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //mMovieAdapter.setMovieData(null);
             }
         });
-
-        setHasOptionsMenu(true);
-
-        loadMovies();
-
-        return root;
     }
 
-    private void loadMovies() {
-        String[] moviesJSONResponse = mContext.getResources().getStringArray(R.array.popular_movies_details);
-        Movie movie = null;
-        ArrayList<Movie> moviesArray = new ArrayList<>();
-        for (String movieJSONResponse : moviesJSONResponse) {
-            try {
-                movie = JsonUtils.parseMovieJson(movieJSONResponse);
-            } catch (JSONException e) {
-                // TODO: Check there is no error parsing JSON without escaping apostrophe (')
-                e.printStackTrace();
-            }
-            if (movie == null) {
-                // TODO: Handle error and remove Toast
-                //closeOnError();
-                Toast.makeText(mContext, "E didn't work at position: " +
-                        String.valueOf(movieJSONResponse), Toast.LENGTH_LONG).show();
-            }
-            moviesArray.add(movie);
-        }
+    private void obtainViewModel() {
+        MoviesFragmentViewModelFactory factory = InjectorUtils.provideMoviesFragmentViewModelFactory(mContext);
+        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragmentViewModel.class);
+    }
 
-        mMovieAdapter.setMovieData(moviesArray);
+    public void setLoadingIndicator(final boolean active) {
+        // setRefreshing() is called after the layout is done with everything else.
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(active);
+            }
+        });
     }
 
     @Override
@@ -119,7 +133,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             case R.id.menu_filter:
                 break;
             case R.id.menu_refresh:
-                loadMovies();
+                setLoadingIndicator(true);
                 break;
         }
         return true;

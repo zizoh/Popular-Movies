@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.zizohanto.popularmovies.movies.ScrollChildSwipeRefreshLayout
+    <com.zizohanto.popularmovies.ui.movies.ScrollChildSwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -13,5 +13,5 @@
 
         </android.support.v7.widget.RecyclerView>
 
-    </com.zizohanto.popularmovies.movies.ScrollChildSwipeRefreshLayout>
+    </com.zizohanto.popularmovies.ui.movies.ScrollChildSwipeRefreshLayout>
 </layout>
