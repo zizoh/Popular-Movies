@@ -1,4 +1,4 @@
-package com.zizohanto.popularmovies.movies;
+package com.zizohanto.popularmovies.ui.movies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

@@ -2,65 +2,69 @@ package com.zizohanto.popularmovies.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "movies")
+@Entity(tableName = "movie", indices = {@Index(value = {"title"}, unique = true)})
 public class Movie {
-    // TODO: Delete public to make class private
 
     @PrimaryKey(autoGenerate = true)
-    public int mId;
-    private String mTitle;
-    private long mVoteAverage;
-    private long mPopularity;
-    private String mReleaseDate;
-    private String mPosterUrl;
-    private String mPlotSynopsis;
+    public int id;
+    private String title;
+    private long voteAverage;
+    private long popularity;
+    private String releaseDate;
+    private String posterUrl;
+    private String plotSynopsis;
 
     public Movie(int id, String title, long voteAverage, long popularity, String releaseDate,
                  String posterUrl, String plotSynopsis) {
-        mId = id;
-        mTitle = title;
-        mVoteAverage = voteAverage;
-        mPopularity = popularity;
-        mReleaseDate = releaseDate;
-        mPosterUrl = posterUrl;
-        mPlotSynopsis = plotSynopsis;
+        this.id = id;
+        this.title = title;
+        this.voteAverage = voteAverage;
+        this.popularity = popularity;
+        this.releaseDate = releaseDate;
+        this.posterUrl = posterUrl;
+        this.plotSynopsis = plotSynopsis;
     }
 
     @Ignore
     public Movie(String title, long voteAverage, long popularity, String releaseDate,
                  String posterUrl, String plotSynopsis) {
-        mTitle = title;
-        mVoteAverage = voteAverage;
-        mPopularity = popularity;
-        mReleaseDate = releaseDate;
-        mPosterUrl = posterUrl;
-        mPlotSynopsis = plotSynopsis;
+        this.title = title;
+        this.voteAverage = voteAverage;
+        this.popularity = popularity;
+        this.releaseDate = releaseDate;
+        this.posterUrl = posterUrl;
+        this.plotSynopsis = plotSynopsis;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getTitle() {
-        return mTitle;
+        return title;
     }
 
-    public Number getVoteAverage() {
-        return mVoteAverage;
+    public long getVoteAverage() {
+        return voteAverage;
     }
 
     public long getPopularity() {
-        return mPopularity;
+        return popularity;
     }
 
     public String getReleaseDate() {
-        return mReleaseDate;
+        return releaseDate;
     }
 
     public String getPosterUrl() {
-        return mPosterUrl;
+        return posterUrl;
     }
 
     public String getPlotSynopsis() {
-        return mPlotSynopsis;
+        return plotSynopsis;
     }
 }
 
