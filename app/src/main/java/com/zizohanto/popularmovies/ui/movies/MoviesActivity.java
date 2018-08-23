@@ -8,13 +8,15 @@ import com.zizohanto.popularmovies.utils.ActivityUtils;
 
 public class MoviesActivity extends AppCompatActivity {
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movies_act);
 
+        addFragmentToActivity();
+    }
+
+    private void addFragmentToActivity() {
         MoviesFragment tasksFragment =
                 (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
         if (tasksFragment == null) {
@@ -41,4 +43,5 @@ public class MoviesActivity extends AppCompatActivity {
 
     // TODO 9: Remove API Key before sharing code publicly
     // TODO 10: App does not crash when there is no network connection
+    // TODO 11: Use timber for logging
 }

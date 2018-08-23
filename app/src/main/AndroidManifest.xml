@@ -18,8 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.details.DetailsActivity">
 
-        <!--This is required for immediate syncs -->
+        </activity>
+
+        <!-- This is required for immediate syncs -->
         <service
             android:name=".data.network.PopularMoviesSyncIntentService"
             android:exported="false" />

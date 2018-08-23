@@ -17,15 +17,15 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
+    private static final String TAG = MovieAdapter.class.getSimpleName();
+
     private List<Movie> mMovies;
     private Context mContext;
-    private MoviesFragment mMoviesFragment;
     private MovieItemClickListener mOnClickListener;
 
-    public MovieAdapter(Context context, MoviesFragment fragment, MovieItemClickListener listener) {
+    public MovieAdapter(Context context, MovieItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
-        mMoviesFragment = fragment;
     }
 
 
@@ -46,10 +46,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         Movie movie = mMovies.get(position);
 
-        String moviePosterUrl = movie.getPosterUrl();
-
+        String posterUrl = movie.getPosterUrl();
         Picasso.with(mContext)
-                .load(moviePosterUrl)
+                .load(posterUrl)
                 .into(holder.mMoviePoster);
 
     }
@@ -107,7 +106,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public interface MovieItemClickListener {
-        void onMovieClick(Movie clickedMovie);
+        void onMovieClick(String clickedMovieTitle);
     }
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -123,7 +122,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            mOnClickListener.onMovieClick(mMovies.get(clickedPosition));
+            String movieTitle = mMovies.get(clickedPosition).getTitle();
+            mOnClickListener.onMovieClick(movieTitle);
         }
 
         private void bind(String posterUrl) {
