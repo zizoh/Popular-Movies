@@ -14,7 +14,7 @@ public class MoviesFragmentViewModelFactory extends ViewModelProvider.NewInstanc
     private final PopularMoviesRepository mRepository;
 
     public MoviesFragmentViewModelFactory(PopularMoviesRepository repository) {
-        this.mRepository = repository;
+        mRepository = repository;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.zizohanto.popularmovies.ui.movies;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,11 +18,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
+import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
@@ -58,7 +59,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
 
         // Set up tasks view
-        // TODO: Check Fix of data binding in next line
         RecyclerView recyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
 
         GridLayoutManager layoutManager = new GridLayoutManager(mContext, 4);
@@ -66,7 +66,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mContext = getActivity();
 
-        mMovieAdapter = new MovieAdapter(mContext, this, this);
+        mMovieAdapter = new MovieAdapter(mContext, this);
 
         recyclerView.setAdapter(mMovieAdapter);
 
@@ -145,7 +145,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     @Override
-    public void onMovieClick(Movie clickedMovie) {
-        Toast.makeText(mContext, clickedMovie.getTitle(), Toast.LENGTH_SHORT).show();
+    public void onMovieClick(String title) {
+        Intent movieDetailIntent = new Intent(getActivity(), DetailsActivity.class);
+        movieDetailIntent.putExtra(DetailsActivity.MOVIE_TITLE_EXTRA, title);
+        startActivity(movieDetailIntent);
     }
 }
