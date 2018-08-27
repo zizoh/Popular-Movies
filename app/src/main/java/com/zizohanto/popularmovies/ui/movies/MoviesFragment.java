@@ -4,12 +4,14 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
@@ -41,6 +42,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private MoviesFragmentViewModel mViewModel;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerViewReadyCallback mRecyclerViewReadyCallback;
+    private SharedPreferences sharedPreferences;
 
 
     public MoviesFragment() {
@@ -72,6 +74,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         recyclerView.setLayoutManager(layoutManager);
 
         mContext = getActivity();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         mMovieAdapter = new MovieAdapter(mContext, this);
 
@@ -136,16 +139,29 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         PopupMenu popup = new PopupMenu(mContext, getActivity().findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
+        String sortBy = sharedPreferences.getString(getString(R.string.pref_key_sort_by),
+                getString(R.string.pref_sort_by_popularity_value));
+
+        if (MoviesSortType.MOST_POPULAR_MOVIES.equals(sortBy)) {
+            popup.getMenu().findItem(R.id.most_popular).setChecked(true);
+        } else {
+            popup.getMenu().findItem(R.id.top_rated).setChecked(true);
+        }
+
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
                 switch (item.getItemId()) {
-                    case R.id.highest_rated:
-                        mMoviesSortType = MoviesSortType.HIGHEST_RATED_MOVIES;
+                    case R.id.top_rated:
+                        editor.putString(getString(R.string.pref_key_sort_by),
+                                getString(R.string.pref_sort_by_top_rated_value));
                         break;
                     default:
-                        mMoviesSortType = MoviesSortType.MOST_POPULAR_MOVIES;
+                        editor.putString(getString(R.string.pref_key_sort_by),
+                                getString(R.string.pref_sort_by_popularity_value));
                         break;
                 }
+                editor.apply();
                 return true;
             }
         });
@@ -156,7 +172,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_SORTING_KEY, mMoviesSortType);
-        Toast.makeText(mContext, "Current sort type: " + String.valueOf(mMoviesSortType), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, "Current sort type: " + String.valueOf(mMoviesSortType), Toast.LENGTH_SHORT).show();
 
         super.onSaveInstanceState(outState);
     }
