@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
@@ -28,13 +31,17 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 import java.util.List;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener {
+    public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private int mPosition = RecyclerView.NO_POSITION;
+    private int mMoviesSortType;
     private MovieAdapter mMovieAdapter;
     private MoviesFragmentViewModel mViewModel;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerViewReadyCallback mRecyclerViewReadyCallback;
+
 
     public MoviesFragment() {
         // Requires empty public constructor
@@ -70,7 +77,42 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         recyclerView.setAdapter(mMovieAdapter);
 
-        obtainViewModel();
+        mRecyclerViewReadyCallback = new RecyclerViewReadyCallback() {
+            @Override
+            public void onLayoutReady() {
+                setLoadingIndicator(false);
+            }
+        };
+
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (null != mRecyclerViewReadyCallback) {
+                    mRecyclerViewReadyCallback.onLayoutReady();
+                } else {
+                    recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            }
+        });
+
+        // Load previously saved state, if available.
+        if (savedInstanceState != null) {
+            mMoviesSortType = savedInstanceState.getInt(CURRENT_SORTING_KEY);
+        }
+
+        setupViewModel(recyclerView);
+
+        setProgressIndicator(recyclerView);
+
+        setHasOptionsMenu(true);
+
+        return root;
+    }
+
+    private void setupViewModel(RecyclerView recyclerView) {
+        MoviesFragmentViewModelFactory factory = InjectorUtils.
+                provideMoviesFragmentViewModelFactory(mContext, mMoviesSortType);
+        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragmentViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
@@ -82,18 +124,41 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                     } else {
                         recyclerView.smoothScrollToPosition(mPosition);
                     }
-                    MoviesFragment.this.setLoadingIndicator(false);
+                    //MoviesFragment.this.setLoadingIndicator(false);
                 } else {
-                    MoviesFragment.this.setLoadingIndicator(true);
+                    //MoviesFragment.this.setLoadingIndicator(true);
                 }
             }
         });
+    }
 
-        setProgressIndicator(recyclerView);
+    private void showSortingPopUpMenu() {
+        PopupMenu popup = new PopupMenu(mContext, getActivity().findViewById(R.id.menu_filter));
+        popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
-        setHasOptionsMenu(true);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.highest_rated:
+                        mMoviesSortType = MoviesSortType.HIGHEST_RATED_MOVIES;
+                        break;
+                    default:
+                        mMoviesSortType = MoviesSortType.MOST_POPULAR_MOVIES;
+                        break;
+                }
+                return true;
+            }
+        });
 
-        return root;
+        popup.show();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(CURRENT_SORTING_KEY, mMoviesSortType);
+        Toast.makeText(mContext, "Current sort type: " + String.valueOf(mMoviesSortType), Toast.LENGTH_SHORT).show();
+
+        super.onSaveInstanceState(outState);
     }
 
     private void setProgressIndicator(RecyclerView recyclerView) {
@@ -112,11 +177,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         });
     }
 
-    private void obtainViewModel() {
-        MoviesFragmentViewModelFactory factory = InjectorUtils.provideMoviesFragmentViewModelFactory(mContext);
-        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragmentViewModel.class);
-    }
-
     public void setLoadingIndicator(final boolean active) {
         // setRefreshing() is called after the layout is done with everything else.
         mSwipeRefreshLayout.post(new Runnable() {
@@ -131,6 +191,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_filter:
+                showSortingPopUpMenu();
                 break;
             case R.id.menu_refresh:
                 setLoadingIndicator(true);
@@ -149,5 +210,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         Intent movieDetailIntent = new Intent(getActivity(), DetailsActivity.class);
         movieDetailIntent.putExtra(DetailsActivity.MOVIE_TITLE_EXTRA, title);
         startActivity(movieDetailIntent);
+    }
+
+    public interface RecyclerViewReadyCallback {
+        void onLayoutReady();
     }
 }

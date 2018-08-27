@@ -33,9 +33,9 @@ public class InjectorUtils {
         return new DetailsFragmentViewModelFactory(repository, title);
     }
 
-    public static MoviesFragmentViewModelFactory provideMoviesFragmentViewModelFactory(Context context) {
+    public static MoviesFragmentViewModelFactory provideMoviesFragmentViewModelFactory(Context context, int moviesSortType) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new MoviesFragmentViewModelFactory(repository);
+        return new MoviesFragmentViewModelFactory(repository, moviesSortType);
     }
 
 }
