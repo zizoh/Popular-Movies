@@ -19,6 +19,8 @@ import java.util.List;
 public class PopularMoviesRepository {
     private static final String LOG_TAG = PopularMoviesRepository.class.getSimpleName();
 
+    private int mMoviesSortType;
+
     // For Singleton instantiation
     private static final Object LOCK = new Object();
     private static PopularMoviesRepository sInstance;
@@ -74,11 +76,11 @@ public class PopularMoviesRepository {
      * Creates periodic sync tasks and checks to see if an immediate sync is required. If an
      * immediate sync is required, this method will take care of making sure that sync occurs.
      */
-    private synchronized void initializeData() {
+    private synchronized void initializeData(int moviesSortType) {
 
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, nothing is done in this method.
-        if (mInitialized) return;
+        //if (mInitialized) return;
         mInitialized = true;
 
         // This method call triggers Popular Movies to create its task to synchronize movie data
@@ -88,7 +90,7 @@ public class PopularMoviesRepository {
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                PopularMoviesRepository.this.startFetchMoviesService();
+                startFetchMoviesService(moviesSortType);
             }
         });
     }
@@ -97,13 +99,14 @@ public class PopularMoviesRepository {
      * Database related operations
      **/
 
-    public LiveData<List<Movie>> getCurrentMovies() {
-        initializeData();
+    public LiveData<List<Movie>> getCurrentMovies(int moviesSortType) {
+        mMoviesSortType = moviesSortType;
+        initializeData(mMoviesSortType);
         return mMovieDao.getAll();
     }
 
     public LiveData<Movie> getMovieByTitle(String title) {
-        initializeData();
+        initializeData(mMoviesSortType);
         return mMovieDao.getMovieByTitle(title);
     }
 
@@ -118,8 +121,8 @@ public class PopularMoviesRepository {
      * Network related operation
      */
 
-    private void startFetchMoviesService() {
-        mMovieNetworkDataSource.startFetchMoviesService();
+    private void startFetchMoviesService(int moviesSortType) {
+        mMovieNetworkDataSource.startFetchMoviesService(moviesSortType);
     }
 
 }

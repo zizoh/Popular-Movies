@@ -10,11 +10,13 @@ import java.util.List;
 
 public class MoviesFragmentViewModel extends ViewModel {
     private final PopularMoviesRepository mRepository;
-    private final LiveData<List<Movie>> mMovies;
+    private LiveData<List<Movie>> mMovies;
+    private int mMoviesSortType;
 
-    public MoviesFragmentViewModel(PopularMoviesRepository repository) {
+    public MoviesFragmentViewModel(PopularMoviesRepository repository, int moviesSortType) {
         mRepository = repository;
-        mMovies = mRepository.getCurrentMovies();
+        mMoviesSortType = moviesSortType;
+        mMovies = mRepository.getCurrentMovies(mMoviesSortType);
     }
 
     public LiveData<List<Movie>> getMovies() {

@@ -3,6 +3,8 @@ package com.zizohanto.popularmovies.data.network;
 import android.net.Uri;
 import android.util.Log;
 
+import com.zizohanto.popularmovies.ui.movies.MoviesSortType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -36,8 +38,13 @@ final class NetworkUtils {
      *
      * @return URL to query movie service
      */
-    static URL getUrl() {
-        String uriEndpoint = "/movie/popular";
+    static URL getUrl(int moviesSortType) {
+        String uriEndpoint;
+        if (moviesSortType == MoviesSortType.HIGHEST_RATED_MOVIES) {
+            uriEndpoint = TOP_RATED_MOVIES_ENDPOINT;
+        } else {
+            uriEndpoint = POPULAR_MOVIES_ENDPOINT;
+        }
         return buildUrlWithEndpoint(uriEndpoint);
     }
 
@@ -49,7 +56,7 @@ final class NetworkUtils {
      * @param uriEndpoint The endpoint that will be queried for.
      * @return The URL to use to query the movie server.
      */
-    static URL buildUrlWithEndpoint(String uriEndpoint) {
+    private static URL buildUrlWithEndpoint(String uriEndpoint) {
         Uri movieQueryUri = Uri.parse(MOVIE_BASE_URL + uriEndpoint).buildUpon()
                 .appendQueryParameter(QUERY_PARAM, YOUR_API_KEY)
                 .build();

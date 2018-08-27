@@ -10,16 +10,17 @@ import com.zizohanto.popularmovies.data.PopularMoviesRepository;
  * {@link com.zizohanto.popularmovies.data.PopularMoviesRepository}
  */
 public class MoviesFragmentViewModelFactory extends ViewModelProvider.NewInstanceFactory {
-
     private final PopularMoviesRepository mRepository;
+    private int mMoviesSortType;
 
-    public MoviesFragmentViewModelFactory(PopularMoviesRepository repository) {
+    public MoviesFragmentViewModelFactory(PopularMoviesRepository repository, int moviesSortType) {
         mRepository = repository;
+        mMoviesSortType = moviesSortType;
     }
 
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new MoviesFragmentViewModel(mRepository);
+        return (T) new MoviesFragmentViewModel(mRepository, mMoviesSortType);
     }
 }

@@ -18,7 +18,6 @@ import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.database.Movie;
 
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an API for doing all operations with the server data
@@ -28,8 +27,10 @@ public class MovieNetworkDataSource {
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
 
     // Interval at which to sync with data.
-    private static final int SYNC_INTERVAL_HOURS = 24;
-    private static final int SYNC_INTERVAL_SECONDS = (int) TimeUnit.HOURS.toSeconds(SYNC_INTERVAL_HOURS);
+    private static final int SYNC_INTERVAL_HOURS = 5;
+    //private static final int SYNC_INTERVAL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(SYNC_INTERVAL_HOURS);
+    private static final int SYNC_INTERVAL_SECONDS = 60;
+    private int mMoviesSortType;
     private static final int SYNC_FLEXTIME_SECONDS = SYNC_INTERVAL_SECONDS / 3;
     private static final String POPULAR_MOVIES_SYNC_TAG = "popular-movies-sync";
 
@@ -67,9 +68,11 @@ public class MovieNetworkDataSource {
     }
 
     /**
-     * Starts an intent service to fetch the movie.
+     * Starts an intent service to fetch the movies.
      */
-    public void startFetchMoviesService() {
+    public void startFetchMoviesService(int moviesSortType) {
+        // TODO: Refactor passing of url parameter to different method
+        mMoviesSortType = moviesSortType;
         Intent intentToFetch = new Intent(mContext, PopularMoviesSyncIntentService.class);
         mContext.startService(intentToFetch);
         Log.d(LOG_TAG, "Service created");
@@ -104,34 +107,37 @@ public class MovieNetworkDataSource {
      */
     void fetchMovies() {
         Log.d(LOG_TAG, "Fetch movies started");
-        mExecutors.networkIO().execute(() -> {
-            try {
+        mExecutors.networkIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-                // The getUrl method will return the URL that we need to get the movies JSON for the
-                // movies. It will create the URL based off of the endpoint selected
-                // by the user: most popular or most rated
-                URL moviesRequestUrl = NetworkUtils.getUrl();
+                    // The getUrl method will return the URL that we need to get the movies JSON for the
+                    // movies. It will create the URL based off of the endpoint selected
+                    // by the user: most popular or highest rated
+                    URL moviesRequestUrl = NetworkUtils.getUrl(mMoviesSortType);
 
-                // Use the URL to retrieve the JSON
-                String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
+                    // Use the URL to retrieve the JSON
+                    String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
 
-                // Parse the JSON into a list of movies
-                MovieResponse response = JsonUtils.parseMovieJson(jsonMovieResponse);
-                Log.d(LOG_TAG, "JSON Parsing finished");
+                    // Parse the JSON into a list of movies
+                    MovieResponse response = JsonUtils.parseMovieJson(jsonMovieResponse);
+                    Log.d(LOG_TAG, "JSON Parsing finished");
 
 
-                // As long as there are movies, update the LiveData storing the most recent
-                // movies. This will trigger PopularMoviesRepository - the observer of that LiveData
-                if (response != null && response.getMovies().length != 0) {
-                    Log.d(LOG_TAG, "JSON not null and has " + response.getMovies().length
-                            + " values");
+                    // As long as there are movies, update the LiveData storing the most recent
+                    // movies. This will trigger PopularMoviesRepository - the observer of that LiveData
+                    if (response != null && response.getMovies().length != 0) {
+                        Log.d(LOG_TAG, "JSON not null and has " + response.getMovies().length
+                                + " values");
 
-                    // postValue used to posts the update to the main thread since off main thread
-                    mDownloadedMovies.postValue(response.getMovies());
+                        // postValue used to posts the update to the main thread since off main thread
+                        mDownloadedMovies.postValue(response.getMovies());
+                    }
+                } catch (Exception e) {
+                    // Server probably invalid
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                // Server probably invalid
-                e.printStackTrace();
             }
         });
     }

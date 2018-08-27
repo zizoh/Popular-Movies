@@ -48,7 +48,7 @@ public class DetailsFragment extends Fragment {
 
         String title = getArguments().getString(MOVIE_TITLE_EXTRA);
 
-        obtainViewModel(title);
+        setupViewModel(title);
 
         mViewModel.getMovie().observe(this, new Observer<Movie>() {
             @Override
@@ -80,7 +80,7 @@ public class DetailsFragment extends Fragment {
         return root;
     }
 
-    private void obtainViewModel(String title) {
+    private void setupViewModel(String title) {
         DetailsFragmentViewModelFactory factory = InjectorUtils.
                 provideDetailsFragmentViewModelFactory(mContext, title);
         mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragmentViewModel.class);
