@@ -3,8 +3,6 @@ package com.zizohanto.popularmovies.data.network;
 import android.net.Uri;
 import android.util.Log;
 
-import com.zizohanto.popularmovies.ui.movies.MoviesSortType;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,7 +23,7 @@ final class NetworkUtils {
 
     private static final String TOP_RATED_MOVIES_ENDPOINT = "/movie/top_rated";
 
-    private static final String MOVIES_ENDPOINT = POPULAR_MOVIES_ENDPOINT;
+    //private static final String MOVIES_ENDPOINT = POPULAR_MOVIES_ENDPOINT;
 
     /* The query parameter allows us to provide an API KEY string to the API */
     private static final String QUERY_PARAM = "api_key";
@@ -38,14 +36,8 @@ final class NetworkUtils {
      *
      * @return URL to query movie service
      */
-    static URL getUrl(int moviesSortType) {
-        String uriEndpoint;
-        if (moviesSortType == MoviesSortType.HIGHEST_RATED_MOVIES) {
-            uriEndpoint = TOP_RATED_MOVIES_ENDPOINT;
-        } else {
-            uriEndpoint = POPULAR_MOVIES_ENDPOINT;
-        }
-        return buildUrlWithEndpoint(uriEndpoint);
+    static URL getUrl(String moviesSortType) {
+        return buildUrlWithEndpoint(moviesSortType);
     }
 
     /**

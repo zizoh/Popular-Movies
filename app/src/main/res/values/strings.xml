@@ -3,7 +3,7 @@
     <string name="menu_filter">Filter</string>
     <string name="refresh">Refresh</string>
     <string name="nav_most_popular">Most Popular</string>
-    <string name="nav_highest_rated">Highest Rated</string>
+    <string name="nav_highest_rated">Top Rated</string>
     <string name="movie_poster">Movie poster</string>
     <string name="details_frag_tv_title">The Meg</string>
     <string name="details_frag_tv_vote_average">6.6</string>
@@ -12,29 +12,13 @@
     <string name="details_frag_tv_popularity">127.639</string>
     <string name="image_placeholder">Image Placeholder</string>
 
+    <!-- Key name for storing sort-by in SharedPreferences -->
+    <string name="pref_key_sort_by" translatable="false">Sort-by</string>
 
-    <string-array name="popular_movies_details">
-        <item>{
-        \"vote_count\": 131,
-        \"id\": 345940,
-        \"video\": false,
-        \"vote_average\": 6.6,
-        \"title\": \"The Meg\",
-        \"popularity\": 127.639,
-        \"poster_path\": \"/xqECHNvzbDL5I3iiOVUkVPJMSbc.jpg\",
-        \"original_language\": \"en\",
-        \"original_title\": \"The Meg\",
-        \"genre_ids\": [
-        28,
-        878,
-        53,
-        27
-        ],
-        \"backdrop_path\": \"/ibKeXahq4JD63z6uWQphqoJLvNw.jpg\",
-        \"adult\": false,
-        \"overview\": \"A deep sea submersible pilot revisits his past fears in the Mariana Trench, and accidentally unleashes the seventy foot ancestor of the Great White Shark believed to be extinct.\",
-        \"release_date\": \"2018-08-09\"}
-        </item>
-    </string-array>
+    <!-- Value in SharedPreferences for sort-by Popularity option -->
+    <string name="pref_sort_by_popularity_value" translatable="false">/movie/popular</string>
+
+    <!-- Value in SharedPreferences for sort-by Top rated option -->
+    <string name="pref_sort_by_top_rated_value" translatable="false">/movie/top_rated</string>
 
 </resources>
