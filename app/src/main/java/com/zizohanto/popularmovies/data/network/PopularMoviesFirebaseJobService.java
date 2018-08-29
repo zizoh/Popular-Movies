@@ -1,5 +1,6 @@
 package com.zizohanto.popularmovies.data.network;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.Job;
@@ -10,6 +11,7 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 public class PopularMoviesFirebaseJobService extends JobService {
     private static final String LOG_TAG = PopularMoviesFirebaseJobService.class.getSimpleName();
+    public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -24,10 +26,12 @@ public class PopularMoviesFirebaseJobService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Job service started");
+        Bundle bundle = jobParameters.getExtras();
+        String moviesSortType = bundle.getString(CURRENT_SORTING_KEY);
 
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
-        networkDataSource.fetchMovies();
+        networkDataSource.fetchMovies(moviesSortType);
 
         jobFinished(jobParameters, false);
 

@@ -6,11 +6,11 @@ import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.PopularMoviesRepository;
 import com.zizohanto.popularmovies.data.database.PopularMovieDatabase;
 import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
-import com.zizohanto.popularmovies.ui.details.DetailsFragmentViewModelFactory;
-import com.zizohanto.popularmovies.ui.movies.MoviesFragmentViewModelFactory;
+import com.zizohanto.popularmovies.ui.details.DetailsFragViewModelFactory;
+import com.zizohanto.popularmovies.ui.movies.MoviesFragViewModelFactory;
 
 /**
- * Provides static methods to inject the various classes needed for Sunshine
+ * Provides static methods to inject the various classes needed for Popular Movies
  */
 public class InjectorUtils {
 
@@ -28,14 +28,15 @@ public class InjectorUtils {
         return MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
     }
 
-    public static DetailsFragmentViewModelFactory provideDetailsFragmentViewModelFactory(Context context, String title) {
+    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, String title) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new DetailsFragmentViewModelFactory(repository, title);
+        return new DetailsFragViewModelFactory(repository, title);
     }
 
-    public static MoviesFragmentViewModelFactory provideMoviesFragmentViewModelFactory(Context context, int moviesSortType) {
+    public static MoviesFragViewModelFactory provideMFViewModelFactory(Context context,
+                                                                       String moviesSortType, Boolean isNotFirstPreferenceChange) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new MoviesFragmentViewModelFactory(repository, moviesSortType);
+        return new MoviesFragViewModelFactory(repository, moviesSortType, isNotFirstPreferenceChange);
     }
 
 }

@@ -9,18 +9,21 @@ import com.zizohanto.popularmovies.data.PopularMoviesRepository;
  * Factory method that to create a ViewModel with a constructor that takes a
  * {@link com.zizohanto.popularmovies.data.PopularMoviesRepository}
  */
-public class MoviesFragmentViewModelFactory extends ViewModelProvider.NewInstanceFactory {
+public class MoviesFragViewModelFactory extends ViewModelProvider.NewInstanceFactory {
     private final PopularMoviesRepository mRepository;
-    private int mMoviesSortType;
+    private String mMoviesSortType;
+    private Boolean mIsNotFirstPreferenceChange;
 
-    public MoviesFragmentViewModelFactory(PopularMoviesRepository repository, int moviesSortType) {
+    public MoviesFragViewModelFactory(PopularMoviesRepository repository,
+                                      String moviesSortType, Boolean isNotFirstPreferenceChange) {
         mRepository = repository;
         mMoviesSortType = moviesSortType;
+        mIsNotFirstPreferenceChange = isNotFirstPreferenceChange;
     }
 
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new MoviesFragmentViewModel(mRepository, mMoviesSortType);
+        return (T) new MoviesFragViewModel(mRepository, mMoviesSortType, mIsNotFirstPreferenceChange);
     }
 }

@@ -21,7 +21,7 @@ public class DetailsFragment extends Fragment {
     public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
 
     private DetailsFragBinding mDetailsFragBinding;
-    private DetailsFragmentViewModel mViewModel;
+    private DetailsFragViewModel mViewModel;
     private Context mContext;
 
     public DetailsFragment() {
@@ -81,8 +81,8 @@ public class DetailsFragment extends Fragment {
     }
 
     private void setupViewModel(String title) {
-        DetailsFragmentViewModelFactory factory = InjectorUtils.
-                provideDetailsFragmentViewModelFactory(mContext, title);
-        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragmentViewModel.class);
+        DetailsFragViewModelFactory factory = InjectorUtils.
+                provideDFViewModelFactory(mContext.getApplicationContext(), title);
+        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 }

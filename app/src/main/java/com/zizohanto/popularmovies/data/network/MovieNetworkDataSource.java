@@ -4,9 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.Constraint;
@@ -17,10 +16,10 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
 import com.zizohanto.popularmovies.AppExecutors;
-import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an API for doing all operations with the server data
@@ -28,12 +27,12 @@ import java.net.URL;
 public class MovieNetworkDataSource {
 
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
+    public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
 
     // Interval at which to sync with data.
-    private static final int SYNC_INTERVAL_HOURS = 5;
-    //private static final int SYNC_INTERVAL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(SYNC_INTERVAL_HOURS);
-    private static final int SYNC_INTERVAL_SECONDS = 60;
-    private int mMoviesSortType;
+    private static final int SYNC_INTERVAL_HOURS = 12;
+    private static final int SYNC_INTERVAL_SECONDS = (int) TimeUnit.MINUTES.toSeconds(SYNC_INTERVAL_HOURS);
+    private String mMoviesSortType;
     private static final int SYNC_FLEXTIME_SECONDS = SYNC_INTERVAL_SECONDS / 3;
     private static final String POPULAR_MOVIES_SYNC_TAG = "popular-movies-sync";
 
@@ -73,12 +72,15 @@ public class MovieNetworkDataSource {
     /**
      * Starts an intent service to fetch the movies.
      */
-    public void startFetchMoviesService(int moviesSortType) {
-        // TODO: Refactor passing of url parameter to different method
-        mMoviesSortType = moviesSortType;
+    public void startFetchMoviesService() {
         Intent intentToFetch = new Intent(mContext, PopularMoviesSyncIntentService.class);
+        intentToFetch.putExtra(CURRENT_SORTING_KEY, mMoviesSortType);
         mContext.startService(intentToFetch);
         Log.d(LOG_TAG, "Service created");
+    }
+
+    public void setSortingCriteria(String moviesSortType) {
+        mMoviesSortType = moviesSortType;
     }
 
     /**
@@ -87,6 +89,9 @@ public class MovieNetworkDataSource {
     public void scheduleRecurringFetchMoviesSync() {
         Driver driver = new GooglePlayDriver(mContext);
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(driver);
+
+        Bundle bundle = new Bundle();
+        bundle.putString(CURRENT_SORTING_KEY, mMoviesSortType);
 
         Job syncPopularMoviesJob = dispatcher.newJobBuilder()
                 .setService(PopularMoviesFirebaseJobService.class)
@@ -98,6 +103,7 @@ public class MovieNetworkDataSource {
                         SYNC_INTERVAL_SECONDS,
                         SYNC_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS))
                 .setReplaceCurrent(true)
+                .setExtras(bundle)
                 .build();
 
         // Schedule the Job with the dispatcher
@@ -108,27 +114,16 @@ public class MovieNetworkDataSource {
     /**
      * Gets the newest movies
      */
-    void fetchMovies() {
+    void fetchMovies(String moviesSortType) {
         Log.d(LOG_TAG, "Fetch movies started");
         mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-
-                    String sortBy = sharedPreferences.getString(mContext.getString(R.string.pref_key_sort_by),
-                            mContext.getString(R.string.pref_sort_by_popularity_value));
-
-                    /*if (sortBy.equals("/movie/popular")) {
-                       mMoviesSortType = 1;
-                    } else {
-                        mMoviesSortType = 2;
-                    }*/
                     // The getUrl method will return the URL that we need to get the movies JSON for the
                     // movies. It will create the URL based off of the endpoint selected
                     // by the user: most popular or highest rated
-                    Log.d(LOG_TAG, "Current sort type: " + sortBy);
-                    URL moviesRequestUrl = NetworkUtils.getUrl(sortBy);
+                    URL moviesRequestUrl = NetworkUtils.getUrl(moviesSortType);
 
                     // Use the URL to retrieve the JSON
                     String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
