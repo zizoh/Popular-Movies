@@ -31,15 +31,19 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
 
-public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener {
-    public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private int mPosition = RecyclerView.NO_POSITION;
-    private int mMoviesSortType;
+    private String mMoviesSortType;
+    private boolean mIsNotFirstPreferenceChange = true;
+    private int mNumberOfPreferenceChange = 0;
     private MovieAdapter mMovieAdapter;
-    private MoviesFragmentViewModel mViewModel;
+    private MoviesFragViewModel mViewModel;
+    private RecyclerView mRecyclerView;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerViewReadyCallback mRecyclerViewReadyCallback;
     private SharedPreferences sharedPreferences;
@@ -68,17 +72,19 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
 
         // Set up tasks view
-        RecyclerView recyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
+        mRecyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
 
         GridLayoutManager layoutManager = new GridLayoutManager(mContext, 4);
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         mContext = getActivity();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mIsNotFirstPreferenceChange = true;
+
+        setupSharedPreferences();
 
         mMovieAdapter = new MovieAdapter(mContext, this);
 
-        recyclerView.setAdapter(mMovieAdapter);
+        mRecyclerView.setAdapter(mMovieAdapter);
 
         mRecyclerViewReadyCallback = new RecyclerViewReadyCallback() {
             @Override
@@ -87,35 +93,38 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             }
         };
 
-        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if (null != mRecyclerViewReadyCallback) {
                     mRecyclerViewReadyCallback.onLayoutReady();
                 } else {
-                    recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 }
             }
         });
 
-        // Load previously saved state, if available.
-        if (savedInstanceState != null) {
-            mMoviesSortType = savedInstanceState.getInt(CURRENT_SORTING_KEY);
-        }
+        setupViewModel();
 
-        setupViewModel(recyclerView);
-
-        setProgressIndicator(recyclerView);
+        setProgressIndicator();
 
         setHasOptionsMenu(true);
 
         return root;
     }
 
-    private void setupViewModel(RecyclerView recyclerView) {
-        MoviesFragmentViewModelFactory factory = InjectorUtils.
-                provideMoviesFragmentViewModelFactory(mContext, mMoviesSortType);
-        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragmentViewModel.class);
+    private void setupSharedPreferences() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mMoviesSortType = sharedPreferences.getString(getString(R.string.pref_key_sort_by),
+                getString(R.string.pref_sort_by_popularity_value));
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setupViewModel() {
+        MoviesFragViewModelFactory factory =
+                InjectorUtils.provideMFViewModelFactory(mContext.getApplicationContext(),
+                        mMoviesSortType, mIsNotFirstPreferenceChange);
+        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
@@ -125,11 +134,11 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
                     } else {
-                        recyclerView.smoothScrollToPosition(mPosition);
+                        mRecyclerView.smoothScrollToPosition(mPosition);
                     }
                     //MoviesFragment.this.setLoadingIndicator(false);
                 } else {
-                    //MoviesFragment.this.setLoadingIndicator(true);
+                    setLoadingIndicator(true);
                 }
             }
         });
@@ -139,10 +148,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         PopupMenu popup = new PopupMenu(mContext, getActivity().findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
-        String sortBy = sharedPreferences.getString(getString(R.string.pref_key_sort_by),
-                getString(R.string.pref_sort_by_popularity_value));
-
-        if (MoviesSortType.MOST_POPULAR_MOVIES.equals(sortBy)) {
+        if (MoviesSortType.MOST_POPULAR_MOVIES.equals(mMoviesSortType)) {
             popup.getMenu().findItem(R.id.most_popular).setChecked(true);
         } else {
             popup.getMenu().findItem(R.id.top_rated).setChecked(true);
@@ -169,26 +175,20 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         popup.show();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(CURRENT_SORTING_KEY, mMoviesSortType);
-        //Toast.makeText(mContext, "Current sort type: " + String.valueOf(mMoviesSortType), Toast.LENGTH_SHORT).show();
-
-        super.onSaveInstanceState(outState);
-    }
-
-    private void setProgressIndicator(RecyclerView recyclerView) {
+    private void setProgressIndicator() {
         mSwipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(mContext, R.color.colorPrimary),
                 ContextCompat.getColor(mContext, R.color.colorAccent),
                 ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
         );
         // Set the scrolling view in the custom SwipeRefreshLayout.
-        mSwipeRefreshLayout.setScrollUpChild(recyclerView);
+        mSwipeRefreshLayout.setScrollUpChild(mRecyclerView);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                setLoadingIndicator(true);
+                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
             }
         });
     }
@@ -211,6 +211,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 break;
             case R.id.menu_refresh:
                 setLoadingIndicator(true);
+                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
                 break;
         }
         return true;
@@ -228,7 +229,31 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         startActivity(movieDetailIntent);
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_key_sort_by))) {
+            mMoviesSortType = sharedPreferences.getString(key,
+                    getResources().getString(R.string.pref_sort_by_popularity_value));
+        }
+        mIsNotFirstPreferenceChange = false;
+        /*mNumberOfPreferenceChange ++;
+        if (mNumberOfPreferenceChange == 1) {
+
+        } else {
+            mIsNotFirstPreferenceChange = true;
+        }*/
+        setLoadingIndicator(true);
+        mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
+    }
+
     public interface RecyclerViewReadyCallback {
         void onLayoutReady();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 }

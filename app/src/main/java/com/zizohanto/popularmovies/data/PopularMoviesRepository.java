@@ -19,7 +19,7 @@ import java.util.List;
 public class PopularMoviesRepository {
     private static final String LOG_TAG = PopularMoviesRepository.class.getSimpleName();
 
-    private int mMoviesSortType;
+    private String mMoviesSortType;
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
@@ -28,6 +28,7 @@ public class PopularMoviesRepository {
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
+    private boolean mIsNotFirstPreferenceChange;
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
@@ -58,6 +59,13 @@ public class PopularMoviesRepository {
         });
     }
 
+    /**
+     * Deletes old movies data
+     */
+    private void deleteOldData() {
+        mMovieDao.deleteAll();
+    }
+
     public synchronized static PopularMoviesRepository getInstance(
             MovieDao movieDao, MovieNetworkDataSource movieNetworkDataSource,
             AppExecutors executors) {
@@ -76,53 +84,55 @@ public class PopularMoviesRepository {
      * Creates periodic sync tasks and checks to see if an immediate sync is required. If an
      * immediate sync is required, this method will take care of making sure that sync occurs.
      */
-    private synchronized void initializeData(int moviesSortType) {
-
+    private synchronized void initializeData() {
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, nothing is done in this method.
-        //if (mInitialized) return;
+        if (mInitialized && mIsNotFirstPreferenceChange) {
+            Log.d(LOG_TAG, "E no go pass+++++++++++++=");
+            return;
+        }
         mInitialized = true;
+        Log.d(LOG_TAG, "E don pass----------=");
+        createSyncTask();
+        startFetchMoviesService();
+    }
 
-        // This method call triggers Popular Movies to create its task to synchronize movie data
-        // periodically.
+    /**
+     * Method triggering Popular Movies to create its task to synchronize movie data periodically.
+     */
+    private void createSyncTask() {
+        mMovieNetworkDataSource.setSortingCriteria(mMoviesSortType);
         mMovieNetworkDataSource.scheduleRecurringFetchMoviesSync();
+    }
 
+    /**
+     * Network related operation
+     */
+    public void startFetchMoviesService() {
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                startFetchMoviesService(moviesSortType);
+                mMovieNetworkDataSource.startFetchMoviesService();
             }
         });
     }
 
     /**
      * Database related operations
-     **/
-
-    public LiveData<List<Movie>> getCurrentMovies(int moviesSortType) {
-        mMoviesSortType = moviesSortType;
-        initializeData(mMoviesSortType);
+     */
+    public LiveData<List<Movie>> getCurrentMovies() {
+        Log.d(LOG_TAG, "Getting current movies: ");
+        initializeData();
         return mMovieDao.getAll();
     }
 
     public LiveData<Movie> getMovieByTitle(String title) {
-        initializeData(mMoviesSortType);
+        initializeData();
         return mMovieDao.getMovieByTitle(title);
     }
 
-    /**
-     * Deletes old movies data
-     */
-    private void deleteOldData() {
-        mMovieDao.deleteAll();
+    public void setSortingCriteria(String moviesSortType, Boolean isNotFirstPreferenceChange) {
+        mMoviesSortType = moviesSortType;
+        mIsNotFirstPreferenceChange = isNotFirstPreferenceChange;
     }
-
-    /**
-     * Network related operation
-     */
-
-    private void startFetchMoviesService(int moviesSortType) {
-        mMovieNetworkDataSource.startFetchMoviesService(moviesSortType);
-    }
-
 }
