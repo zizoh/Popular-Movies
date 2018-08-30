@@ -28,7 +28,7 @@ public class PopularMoviesRepository {
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private boolean mIsNotFirstPreferenceChange;
+    private boolean mIsNotPreferenceChange;
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
@@ -87,7 +87,7 @@ public class PopularMoviesRepository {
     private synchronized void initializeData() {
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, nothing is done in this method.
-        if (mInitialized && mIsNotFirstPreferenceChange) {
+        if (mInitialized && mIsNotPreferenceChange) {
             Log.d(LOG_TAG, "E no go pass+++++++++++++=");
             return;
         }
@@ -131,8 +131,8 @@ public class PopularMoviesRepository {
         return mMovieDao.getMovieByTitle(title);
     }
 
-    public void setSortingCriteria(String moviesSortType, Boolean isNotFirstPreferenceChange) {
+    public void setSortingCriteria(String moviesSortType, Boolean isNotPreferenceChange) {
         mMoviesSortType = moviesSortType;
-        mIsNotFirstPreferenceChange = isNotFirstPreferenceChange;
+        mIsNotPreferenceChange = isNotPreferenceChange;
     }
 }

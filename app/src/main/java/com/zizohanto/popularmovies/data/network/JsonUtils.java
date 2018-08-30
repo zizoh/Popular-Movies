@@ -59,14 +59,14 @@ final public class JsonUtils {
         /* Get the string representing the movie's release date */
         String releaseDate = getStringFromJSONObject(movieJson, PM_MOVIE_RELEASE_DATE);
 
-        /* Get the string representing the movie's poster url */
-        String posterUrl = getStringFromJSONObject(movieJson, PM_MOVIE_POSTER_URL);
+        /* Get the string representing the movie's poster file path */
+        String posterFilePath = getStringFromJSONObject(movieJson, PM_MOVIE_POSTER_URL);
 
         /* Get the string representing the movie's plot synopsis */
         String plotSynopsis = getStringFromJSONObject(movieJson, PM_MOVIE_PLOT_SYNOPSIS);
 
         return new Movie(title, voteAverage, popularity, releaseDate,
-                buildCompletePosterUrl(posterUrl), plotSynopsis);
+                buildCompletePosterUrl(posterFilePath), plotSynopsis);
     }
 
     private static String getStringFromJSONObject(JSONObject jsonObject, String key) throws JSONException {
@@ -77,13 +77,13 @@ final public class JsonUtils {
         return jsonObject.getLong(key);
     }
 
-    private static String buildCompletePosterUrl(String relativePath) {
+    private static String buildCompletePosterUrl(String filePath) {
 
         final String moviePosterBaseUrl = "http://image.tmdb.org/t/p/";
 
-        final String moviePosterSize = "w185";
+        final String moviePosterSize = "w185/";
 
-        return new String(moviePosterBaseUrl + moviePosterSize + "/" + relativePath);
+        return new String(moviePosterBaseUrl + moviePosterSize + filePath);
     }
 
 

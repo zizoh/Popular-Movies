@@ -17,16 +17,22 @@ final class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    private static final String MOVIE_BASE_URL = "http://api.themoviedb.org/3";
+    private static final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/";
 
-    private static final String POPULAR_MOVIES_ENDPOINT = "/movie/popular";
+    private static final String POPULAR_MOVIES_ENDPOINT = "movie/popular";
 
-    private static final String TOP_RATED_MOVIES_ENDPOINT = "/movie/top_rated";
+    private static final String TOP_RATED_MOVIES_ENDPOINT = "movie/top_rated";
 
     //private static final String MOVIES_ENDPOINT = POPULAR_MOVIES_ENDPOINT;
 
-    /* The query parameter allows us to provide an API KEY string to the API */
+    /* The query parameter to provide an API KEY string to the API */
     private static final String QUERY_PARAM = "api_key";
+
+    /* The page parameter to provide get results by pages */
+    private static final String PAGE_PARAM = "page";
+
+    /* The query parameter allows us to provide an API KEY string to the API */
+    private static int pageNumber = 5;
 
     private static final String YOUR_API_KEY = "***REMOVED***";
 
@@ -51,6 +57,7 @@ final class NetworkUtils {
     private static URL buildUrlWithEndpoint(String uriEndpoint) {
         Uri movieQueryUri = Uri.parse(MOVIE_BASE_URL + uriEndpoint).buildUpon()
                 .appendQueryParameter(QUERY_PARAM, YOUR_API_KEY)
+                .appendQueryParameter(PAGE_PARAM, String.valueOf(pageNumber))
                 .build();
 
         try {

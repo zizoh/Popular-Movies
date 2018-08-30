@@ -39,7 +39,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private MoviesFragBinding mMoviesFragBinding;
     private int mPosition = RecyclerView.NO_POSITION;
     private String mMoviesSortType;
-    private boolean mIsNotFirstPreferenceChange = true;
+    private boolean mIsNotPreferenceChange = true;
     private int mNumberOfPreferenceChange = 0;
     private MovieAdapter mMovieAdapter;
     private MoviesFragViewModel mViewModel;
@@ -78,7 +78,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mRecyclerView.setLayoutManager(layoutManager);
 
         mContext = getActivity();
-        mIsNotFirstPreferenceChange = true;
 
         setupSharedPreferences();
 
@@ -123,7 +122,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setupViewModel() {
         MoviesFragViewModelFactory factory =
                 InjectorUtils.provideMFViewModelFactory(mContext.getApplicationContext(),
-                        mMoviesSortType, mIsNotFirstPreferenceChange);
+                        mMoviesSortType, mIsNotPreferenceChange);
         mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
@@ -131,6 +130,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             public void onChanged(@Nullable List<Movie> movies) {
                 if (movies != null && movies.size() != 0) {
                     mMovieAdapter.setMovieData(movies);
+                    mSwipeRefreshLayout.setRefreshing(false);
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
                     } else {
@@ -188,7 +188,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             @Override
             public void onRefresh() {
                 setLoadingIndicator(true);
-                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
+                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotPreferenceChange);
             }
         });
     }
@@ -211,7 +211,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 break;
             case R.id.menu_refresh:
                 setLoadingIndicator(true);
-                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
+                mViewModel.getCurrentMovies(mMoviesSortType, mIsNotPreferenceChange);
                 break;
         }
         return true;
@@ -233,17 +233,17 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_key_sort_by))) {
             mMoviesSortType = sharedPreferences.getString(key,
-                    getResources().getString(R.string.pref_sort_by_popularity_value));
+                    getString(R.string.pref_sort_by_popularity_value));
         }
-        mIsNotFirstPreferenceChange = false;
+        //mIsNotPreferenceChange = false;
         /*mNumberOfPreferenceChange ++;
         if (mNumberOfPreferenceChange == 1) {
 
         } else {
-            mIsNotFirstPreferenceChange = true;
+            mIsNotPreferenceChange = true;
         }*/
         setLoadingIndicator(true);
-        mViewModel.getCurrentMovies(mMoviesSortType, mIsNotFirstPreferenceChange);
+        mViewModel.getCurrentMovies(mMoviesSortType, false);
     }
 
     public interface RecyclerViewReadyCallback {
