@@ -16,9 +16,9 @@
     <string name="pref_key_sort_by" translatable="false">Sort-by</string>
 
     <!-- Value in SharedPreferences for sort-by Popularity option -->
-    <string name="pref_sort_by_popularity_value" translatable="false">/movie/popular</string>
+    <string name="pref_sort_by_popularity_value" translatable="false">movie/popular</string>
 
     <!-- Value in SharedPreferences for sort-by Top rated option -->
-    <string name="pref_sort_by_top_rated_value" translatable="false">/movie/top_rated</string>
+    <string name="pref_sort_by_top_rated_value" translatable="false">movie/top_rated</string>
 
 </resources>

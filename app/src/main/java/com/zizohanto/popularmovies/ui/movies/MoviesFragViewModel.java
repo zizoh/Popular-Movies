@@ -12,14 +12,14 @@ public class MoviesFragViewModel extends ViewModel {
     private final PopularMoviesRepository mRepository;
     private LiveData<List<Movie>> mMovies;
     private String mMoviesSortType;
-    private Boolean mIsNotFirstPreferenceChange;
+    private Boolean mIsNotPreferenceChange;
 
     public MoviesFragViewModel(PopularMoviesRepository repository, String moviesSortType,
-                               Boolean isNotFirstPreferenceChange) {
+                               Boolean isNotPreferenceChange) {
         mRepository = repository;
         mMoviesSortType = moviesSortType;
-        mIsNotFirstPreferenceChange = isNotFirstPreferenceChange;
-        mRepository.setSortingCriteria(mMoviesSortType, mIsNotFirstPreferenceChange);
+        mIsNotPreferenceChange = isNotPreferenceChange;
+        mRepository.setSortingCriteria(mMoviesSortType, mIsNotPreferenceChange);
         mMovies = mRepository.getCurrentMovies();
     }
 
@@ -27,8 +27,8 @@ public class MoviesFragViewModel extends ViewModel {
         return mMovies;
     }
 
-    public void getCurrentMovies(String moviesSortType, Boolean isNotFirstPreferenceChange) {
-        mRepository.setSortingCriteria(moviesSortType, isNotFirstPreferenceChange);
+    public void getCurrentMovies(String moviesSortType, Boolean isNotPreferenceChange) {
+        mRepository.setSortingCriteria(moviesSortType, isNotPreferenceChange);
         mMovies = mRepository.getCurrentMovies();
     }
 }
