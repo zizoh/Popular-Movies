@@ -3,10 +3,12 @@ package com.zizohanto.popularmovies.data.database;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 import android.util.Log;
 
 @Database(entities = {Movie.class}, version = 1)
+@TypeConverters(ListTypeConverter.class)
 public abstract class PopularMovieDatabase extends RoomDatabase {
 
     private static final String LOG_TAG = PopularMovieDatabase.class.getSimpleName();

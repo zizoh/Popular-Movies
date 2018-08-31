@@ -19,7 +19,9 @@ public class PopularMoviesSyncIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(LOG_TAG, "Intent service started");
-        mMoviesSortType = intent.getStringExtra(CURRENT_SORTING_KEY);
+        if (null != intent) {
+            mMoviesSortType = intent.getStringExtra(CURRENT_SORTING_KEY);
+        }
         Log.d(LOG_TAG, "Current sort type: " + mMoviesSortType);
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());

@@ -17,9 +17,14 @@ import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
 import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.MovieResponse;
 
-import java.net.URL;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Provides an API for doing all operations with the server data
@@ -28,6 +33,8 @@ public class MovieNetworkDataSource {
 
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+    private static final String API_KEY = "30e6ddb8d33a868f0c63e40f647ea1a6";
+    private static int pageNumber = 5;
 
     // Interval at which to sync with data.
     private static final int SYNC_INTERVAL_HOURS = 12;
@@ -42,13 +49,13 @@ public class MovieNetworkDataSource {
     private final Context mContext;
 
     // LiveData storing the latest downloaded movies data
-    private final MutableLiveData<Movie[]> mDownloadedMovies;
+    private final MutableLiveData<List<Movie>> mDownloadedMovies;
     private final AppExecutors mExecutors;
 
     private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors) {
         mContext = context;
         mExecutors = executors;
-        mDownloadedMovies = new MutableLiveData<Movie[]>();
+        mDownloadedMovies = new MutableLiveData<List<Movie>>();
     }
 
     /**
@@ -65,7 +72,7 @@ public class MovieNetworkDataSource {
         return sInstance;
     }
 
-    public LiveData<Movie[]> getTodaysMoviesData() {
+    public LiveData<List<Movie>> getTodaysMoviesData() {
         return mDownloadedMovies;
     }
 
@@ -119,32 +126,31 @@ public class MovieNetworkDataSource {
         mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    // The getUrl method will return the URL that we need to get the movies JSON for the
-                    // movies. It will create the URL based off of the endpoint selected
-                    // by the user: most popular or highest rated
-                    URL moviesRequestUrl = NetworkUtils.getUrl(moviesSortType);
+                ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+                Call<MovieResponse> call;
 
-                    // Use the URL to retrieve the JSON
-                    String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
-
-                    // Parse the JSON into a list of movies
-                    MovieResponse response = JsonUtils.parseMovieJson(jsonMovieResponse);
-                    Log.d(LOG_TAG, "JSON Parsing finished");
-
-                    // As long as there are movies, update the LiveData storing the most recent
-                    // movies. This will trigger PopularMoviesRepository - the observer of that LiveData
-                    if (response != null && response.getMovies().length != 0) {
-                        Log.d(LOG_TAG, "JSON not null and has " + response.getMovies().length
-                                + " values");
-
-                        // postValue used to posts the update to the main thread since off main thread
-                        mDownloadedMovies.postValue(response.getMovies());
-                    }
-                } catch (Exception e) {
-                    // Server probably invalid
-                    e.printStackTrace();
+                if (moviesSortType.equals("movie/popular")) {
+                    call = apiService.getPopularMovies(API_KEY, pageNumber);
+                } else {
+                    call = apiService.getTopRatedMovies(API_KEY, pageNumber);
                 }
+                call.enqueue(new Callback<MovieResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
+                        if (null != response.body()) {
+                            List<Movie> movies = response.body().getMovies();
+                            mDownloadedMovies.postValue(response.body().getMovies());
+                            Log.d(LOG_TAG, "Number of movies received: " + movies.size());
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                        // Log error here since request failed
+                        Log.e(LOG_TAG, t.toString());
+                    }
+                });
             }
         });
     }
