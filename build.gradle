@@ -15,17 +15,26 @@ buildscript {
     }
 }
 
-ext.arch_version = "1.1.1"
-ext.support_version = "27.1.1"
-ext.constraint_layout_version = "1.1.2"
-ext.picasso_version = "2.5.2"
-ext.gson_version = "2.8.2"
-ext.retrofit_retrofit_version = "2.3.0"
-ext.retrofit_converter_version = "2.0.2"
-ext.firebase_jobdispatcher_version = "0.7.0"
-ext.junit_version = "4.12"
-ext.support_test_version = "1.0.2"
-ext.espresso_version = "3.0.2"
+ext {
+    compileSdkVersion = 27
+    minSdkVersion = 16
+    targetSdkVersion = 27
+    supportLibVersion = "27.1.1"
+    constraintLayoutVersion = "1.1.2"
+    archComponentsVersion = "1.1.1"
+    pagingVersion = "1.0.1"
+    retrofitVersion = "2.3.0"
+    retrofitConverterVersion = "2.0.2"
+    gsonVersion = "2.8.2"
+    picassoVersion = "2.5.2"
+    firebaseJobdispatcherVersion = "0.7.0"
+    okhttpLoggingInterceptorVersion = "3.9.0"
+
+    junitVersion = "4.12"
+    supportTestVersion = "1.0.2"
+    espressoVersion = "3.0.2"
+}
+
 
 allprojects {
     repositories {

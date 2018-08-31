@@ -126,7 +126,7 @@ public class MovieNetworkDataSource {
         mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
-                ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+                ApiInterface apiService = ApiClient.getClient();
                 Call<MovieResponse> call;
 
                 if (moviesSortType.equals("movie/popular")) {
@@ -137,12 +137,14 @@ public class MovieNetworkDataSource {
                 call.enqueue(new Callback<MovieResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                        if (null != response.body()) {
+                        Log.d(LOG_TAG, "got a response " + response);
+                        if (response.isSuccessful()) {
                             List<Movie> movies = response.body().getMovies();
                             mDownloadedMovies.postValue(response.body().getMovies());
                             Log.d(LOG_TAG, "Number of movies received: " + movies.size());
+                        } else {
+                            Log.d(LOG_TAG, String.valueOf(response.errorBody()) + "Unknown error");
                         }
-
                     }
 
                     @Override
