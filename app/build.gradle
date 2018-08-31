@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
         applicationId "com.zizohanto.popularmoviesapp"
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -27,35 +27,39 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // Support library
-    implementation "com.android.support:appcompat-v7:$support_version"
-    implementation "com.android.support:recyclerview-v7:$support_version"
-    implementation "com.android.support:preference-v7:$support_version"
-    implementation "com.android.support.constraint:constraint-layout:$constraint_layout_version"
+    // support library
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "com.android.support:recyclerview-v7:$supportLibVersion"
+    implementation "com.android.support:preference-v7:$supportLibVersion"
+    implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
 
-    // Image loading
-    implementation "com.squareup.picasso:picasso:$picasso_version"
+    // image loading
+    implementation "com.squareup.picasso:picasso:$picassoVersion"
 
-    // Gson
-    implementation "com.google.code.gson:gson:$gson_version"
+    // 
 
-    // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:$retrofit_retrofit_version"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofit_converter_version"
+    // gson
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
-    // Job scheduling
-    implementation "com.firebase:firebase-jobdispatcher:$firebase_jobdispatcher_version"
+    // retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpLoggingInterceptorVersion"
 
-    // Architecture components
-    implementation "android.arch.lifecycle:runtime:$arch_version"
-    implementation "android.arch.lifecycle:extensions:$arch_version"
-    annotationProcessor "android.arch.lifecycle:compiler:$arch_version"
-    implementation "android.arch.persistence.room:runtime:$arch_version"
-    annotationProcessor "android.arch.persistence.room:compiler:$arch_version"
+    // job scheduling
+    implementation "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
 
-    testImplementation "junit:junit:$junit_version"
-    testImplementation "com.android.support.test:runner:$support_test_version"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espresso_version"
+    // architecture components
+    implementation "android.arch.lifecycle:runtime:$archComponentsVersion"
+    implementation "android.arch.lifecycle:extensions:$archComponentsVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$archComponentsVersion"
+    implementation "android.arch.persistence.room:runtime:$archComponentsVersion"
+    implementation "android.arch.paging:runtime:$pagingVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$archComponentsVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "com.android.support.test:runner:$supportTestVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
 
     // TODO: Clean unused dependencies
 }
