@@ -23,7 +23,7 @@ public interface MovieDao {
 
     // Inserts multiple movies
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void bulkInsert(Movie... movies);
+    void bulkInsert(List<Movie> movies);
 
     // Deletes all movies from the database
     @Query("DELETE FROM movie")

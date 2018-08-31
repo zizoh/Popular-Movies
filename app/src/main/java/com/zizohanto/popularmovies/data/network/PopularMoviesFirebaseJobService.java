@@ -27,7 +27,10 @@ public class PopularMoviesFirebaseJobService extends JobService {
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Job service started");
         Bundle bundle = jobParameters.getExtras();
-        String moviesSortType = bundle.getString(CURRENT_SORTING_KEY);
+        String moviesSortType = null;
+        if (null != bundle) {
+            moviesSortType = bundle.getString(CURRENT_SORTING_KEY);
+        }
 
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());

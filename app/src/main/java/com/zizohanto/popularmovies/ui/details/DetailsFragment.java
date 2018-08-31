@@ -45,8 +45,10 @@ public class DetailsFragment extends Fragment {
         mDetailsFragBinding = DataBindingUtil.inflate(inflater, R.layout.details_frag, container, false);
         View root = mDetailsFragBinding.getRoot();
         mContext = getActivity();
-
-        String title = getArguments().getString(MOVIE_TITLE_EXTRA);
+        String title = null;
+        if (null != getArguments()) {
+            title = getArguments().getString(MOVIE_TITLE_EXTRA);
+        }
 
         setupViewModel(title);
 
@@ -54,7 +56,7 @@ public class DetailsFragment extends Fragment {
             @Override
             public void onChanged(@Nullable Movie movie) {
                 if (null != movie) {
-                    String posterUrl = movie.getPosterUrl();
+                    String posterUrl = movie.getPosterPath();
                     Picasso.with(mContext)
                             .load(posterUrl)
                             .into(mDetailsFragBinding.ivMoviePoster);
@@ -71,7 +73,7 @@ public class DetailsFragment extends Fragment {
                     String popularity = String.valueOf(movie.getPopularity());
                     mDetailsFragBinding.tvPopularity.setText(popularity);
 
-                    String synopsis = movie.getPlotSynopsis();
+                    String synopsis = movie.getOverview();
                     mDetailsFragBinding.tvPlotSynopsis.setText(synopsis);
                 }
             }

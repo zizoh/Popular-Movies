@@ -38,6 +38,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private int mPosition = RecyclerView.NO_POSITION;
+    public static final String MOST_POPULAR_MOVIES = "movie/popular";
     private String mMoviesSortType;
     private boolean mIsNotPreferenceChange = true;
     private int mNumberOfPreferenceChange = 0;
@@ -148,7 +149,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         PopupMenu popup = new PopupMenu(mContext, getActivity().findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
-        if (MoviesSortType.MOST_POPULAR_MOVIES.equals(mMoviesSortType)) {
+        if (MOST_POPULAR_MOVIES.equals(mMoviesSortType)) {
             popup.getMenu().findItem(R.id.most_popular).setChecked(true);
         } else {
             popup.getMenu().findItem(R.id.top_rated).setChecked(true);

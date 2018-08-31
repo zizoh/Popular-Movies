@@ -39,11 +39,11 @@ public class PopularMoviesRepository {
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
-        LiveData<Movie[]> networkData = mMovieNetworkDataSource.getTodaysMoviesData();
+        LiveData<List<Movie>> networkData = mMovieNetworkDataSource.getTodaysMoviesData();
 
-        networkData.observeForever(new Observer<Movie[]>() {
+        networkData.observeForever(new Observer<List<Movie>>() {
             @Override
-            public void onChanged(@Nullable Movie[] newMoviesFromNetwork) {
+            public void onChanged(@Nullable List<Movie> newMoviesFromNetwork) {
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {

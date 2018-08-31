@@ -41,18 +41,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull MovieAdapter.MovieAdapterViewHolder holder, int position) {
+    private static String buildCompletePosterUrl(String filePath) {
 
-        Movie movie = mMovies.get(position);
+        final String baseUrl = "http://image.tmdb.org/t/p/";
 
-        String posterUrl = movie.getPosterUrl();
-        Picasso.with(mContext)
-                .load(posterUrl)
-                .error(mContext.getResources().getDrawable(R.drawable.no_image))
-                .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
-                .into(holder.mMoviePoster);
+        final String posterSize = "w185/";
 
+        return new String(baseUrl + posterSize + filePath);
     }
 
     @Override
@@ -62,6 +57,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         } else {
             return mMovies.size();
         }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MovieAdapter.MovieAdapterViewHolder holder, int position) {
+
+        Movie movie = mMovies.get(position);
+
+        String posterUrl = movie.getPosterPath();
+
+        Picasso.with(mContext)
+                .load(buildCompletePosterUrl(posterUrl))
+                .error(mContext.getResources().getDrawable(R.drawable.no_image))
+                .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
+                .into(holder.mMoviePoster);
+
     }
 
     public void setMovieData(List<Movie> newMovies) {
