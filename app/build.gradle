@@ -44,7 +44,6 @@ dependencies {
     // retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterVersion"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpLoggingInterceptorVersion"
 
     // job scheduling
     implementation "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
