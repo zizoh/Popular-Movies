@@ -34,7 +34,7 @@ public class MovieNetworkDataSource {
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
     private static final String API_KEY = "***REMOVED***";
-    private static int pageNumber = 5;
+    private static int pageNumber = 1;
 
     // Interval at which to sync with data.
     private static final int SYNC_INTERVAL_HOURS = 12;
