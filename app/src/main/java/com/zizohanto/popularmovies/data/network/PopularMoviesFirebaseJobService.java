@@ -12,6 +12,7 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 public class PopularMoviesFirebaseJobService extends JobService {
     private static final String LOG_TAG = PopularMoviesFirebaseJobService.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+    public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -28,13 +29,15 @@ public class PopularMoviesFirebaseJobService extends JobService {
         Log.d(LOG_TAG, "Job service started");
         Bundle bundle = jobParameters.getExtras();
         String moviesSortType = null;
+        int pageToLoad = 0;
         if (null != bundle) {
             moviesSortType = bundle.getString(CURRENT_SORTING_KEY);
+            pageToLoad = bundle.getInt(PAGE_TO_LOAD_KEY);
         }
 
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
-        networkDataSource.fetchMovies(moviesSortType);
+        networkDataSource.fetchMovies(moviesSortType, pageToLoad);
 
         jobFinished(jobParameters, false);
 

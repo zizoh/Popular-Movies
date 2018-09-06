@@ -14,18 +14,21 @@ public class MoviesFragViewModelFactory extends ViewModelProvider.NewInstanceFac
     private final PopularMoviesRepository mRepository;
     private String mMoviesSortType;
     private Boolean mIsNotFirstPreferenceChange;
+    private int mPageToLoad;
 
     public MoviesFragViewModelFactory(PopularMoviesRepository repository,
-                                      String moviesSortType, Boolean isNotFirstPreferenceChange) {
+                                      String moviesSortType, Boolean isNotFirstPreferenceChange,
+                                      int pageToLoad) {
         mRepository = repository;
         mMoviesSortType = moviesSortType;
         mIsNotFirstPreferenceChange = isNotFirstPreferenceChange;
+        mPageToLoad = pageToLoad;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new MoviesFragViewModel(mRepository, mMoviesSortType, mIsNotFirstPreferenceChange);
+        return (T) new MoviesFragViewModel(mRepository, mMoviesSortType, mIsNotFirstPreferenceChange, mPageToLoad);
     }
 }

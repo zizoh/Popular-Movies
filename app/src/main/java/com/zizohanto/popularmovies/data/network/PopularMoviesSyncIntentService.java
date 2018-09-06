@@ -10,7 +10,9 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 public class PopularMoviesSyncIntentService extends IntentService {
     private static final String LOG_TAG = PopularMoviesSyncIntentService.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+    public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
     private String mMoviesSortType;
+    private int mPageToLoad;
 
     public PopularMoviesSyncIntentService() {
         super("PopularMoviesSyncIntentService");
@@ -21,10 +23,10 @@ public class PopularMoviesSyncIntentService extends IntentService {
         Log.d(LOG_TAG, "Intent service started");
         if (null != intent) {
             mMoviesSortType = intent.getStringExtra(CURRENT_SORTING_KEY);
+            mPageToLoad = intent.getIntExtra(PAGE_TO_LOAD_KEY, 1);
         }
-        Log.d(LOG_TAG, "Current sort type: " + mMoviesSortType);
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
-        networkDataSource.fetchMovies(mMoviesSortType);
+        networkDataSource.fetchMovies(mMoviesSortType, mPageToLoad);
     }
 }

@@ -34,9 +34,11 @@ public class InjectorUtils {
     }
 
     public static MoviesFragViewModelFactory provideMFViewModelFactory(Context context,
-                                                                       String moviesSortType, Boolean isNotFirstPreferenceChange) {
+                                                                       String moviesSortType,
+                                                                       Boolean isNotFirstPreferenceChange,
+                                                                       int pageToLoad) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new MoviesFragViewModelFactory(repository, moviesSortType, isNotFirstPreferenceChange);
+        return new MoviesFragViewModelFactory(repository, moviesSortType, isNotFirstPreferenceChange, pageToLoad);
     }
 
 }

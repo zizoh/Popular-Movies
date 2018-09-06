@@ -78,7 +78,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         // If there was no forecast data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
-            notifyDataSetChanged();
         } else {
             /*
              * Otherwise we use DiffUtil to calculate the changes and update accordingly. This
@@ -115,6 +114,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             mMovies = newMovies;
             result.dispatchUpdatesTo(this);
         }
+        notifyDataSetChanged();
     }
 
     public interface MovieItemClickListener {

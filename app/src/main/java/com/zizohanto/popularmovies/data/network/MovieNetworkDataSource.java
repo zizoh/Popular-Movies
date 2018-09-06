@@ -33,8 +33,9 @@ public class MovieNetworkDataSource {
 
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+    public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
     private static final String API_KEY = "***REMOVED***";
-    private static int pageNumber = 1;
+    private int mPageToLoad;
 
     // Interval at which to sync with data.
     private static final int SYNC_INTERVAL_HOURS = 12;
@@ -82,12 +83,14 @@ public class MovieNetworkDataSource {
     public void startFetchMoviesService() {
         Intent intentToFetch = new Intent(mContext, PopularMoviesSyncIntentService.class);
         intentToFetch.putExtra(CURRENT_SORTING_KEY, mMoviesSortType);
+        intentToFetch.putExtra(PAGE_TO_LOAD_KEY, mPageToLoad);
         mContext.startService(intentToFetch);
         Log.d(LOG_TAG, "Service created");
     }
 
-    public void setSortingCriteria(String moviesSortType) {
+    public void setFetchCriteria(String moviesSortType, int pageToLoad) {
         mMoviesSortType = moviesSortType;
+        mPageToLoad = pageToLoad;
     }
 
     /**
@@ -99,12 +102,13 @@ public class MovieNetworkDataSource {
 
         Bundle bundle = new Bundle();
         bundle.putString(CURRENT_SORTING_KEY, mMoviesSortType);
+        bundle.putInt(PAGE_TO_LOAD_KEY, mPageToLoad);
 
         Job syncPopularMoviesJob = dispatcher.newJobBuilder()
                 .setService(PopularMoviesFirebaseJobService.class)
                 .setTag(POPULAR_MOVIES_SYNC_TAG)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
-                .setLifetime(Lifetime.FOREVER)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setRecurring(true)
                 .setTrigger(Trigger.executionWindow(
                         SYNC_INTERVAL_SECONDS,
@@ -119,9 +123,9 @@ public class MovieNetworkDataSource {
     }
 
     /**
-     * Gets the newest movies
+     * Get movies
      */
-    void fetchMovies(String moviesSortType) {
+    void fetchMovies(String moviesSortType, int pageToLoad) {
         Log.d(LOG_TAG, "Fetch movies started");
         mExecutors.networkIO().execute(new Runnable() {
             @Override
@@ -130,9 +134,9 @@ public class MovieNetworkDataSource {
                 Call<MovieResponse> call;
 
                 if (moviesSortType.equals("movie/popular")) {
-                    call = apiService.getPopularMovies(API_KEY, pageNumber);
+                    call = apiService.getPopularMovies(API_KEY, pageToLoad);
                 } else {
-                    call = apiService.getTopRatedMovies(API_KEY, pageNumber);
+                    call = apiService.getTopRatedMovies(API_KEY, pageToLoad);
                 }
                 call.enqueue(new Callback<MovieResponse>() {
                     @Override
@@ -156,5 +160,4 @@ public class MovieNetworkDataSource {
             }
         });
     }
-
 }

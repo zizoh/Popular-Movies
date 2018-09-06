@@ -38,6 +38,15 @@ public class DetailsFragment extends Fragment {
 
     }
 
+    private static String buildCompletePosterUrl(String filePath) {
+
+        final String baseUrl = "http://image.tmdb.org/t/p/";
+
+        final String posterSize = "w185/";
+
+        return new String(baseUrl + posterSize + filePath);
+    }
+
     @Override
     public View onCreateView(@Nullable LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,7 +67,9 @@ public class DetailsFragment extends Fragment {
                 if (null != movie) {
                     String posterUrl = movie.getPosterPath();
                     Picasso.with(mContext)
-                            .load(posterUrl)
+                            .load(buildCompletePosterUrl(posterUrl))
+                            .error(mContext.getResources().getDrawable(R.drawable.no_image))
+                            .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
                             .into(mDetailsFragBinding.ivMoviePoster);
 
                     String title = movie.getTitle();
@@ -84,7 +95,7 @@ public class DetailsFragment extends Fragment {
 
     private void setupViewModel(String title) {
         DetailsFragViewModelFactory factory = InjectorUtils.
-                provideDFViewModelFactory(mContext.getApplicationContext(), title);
+                provideDFViewModelFactory(mContext, title);
         mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 }
