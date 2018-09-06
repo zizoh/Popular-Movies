@@ -26,6 +26,7 @@ import android.view.ViewTreeObserver;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
 import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
@@ -33,7 +34,8 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 import java.util.List;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        MovieNetworkDataSource.OnResponseListener {
     private static final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private Context mContext;
@@ -89,30 +91,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int visibleItemCount = layoutManager.getChildCount();
-                int totalItemCount = layoutManager.getItemCount();
-                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
-
-
-                if (isMoreFetchNeeded(visibleItemCount, totalItemCount, firstVisibleItemPosition) && !isLoading) {
-                    mPageToLoad++;
-                    Log.e(LOG_TAG, "fetch more movies called");
-                    fetchMoreMovies(mPageToLoad);
-                    isLoading = true;
-                }
-            }
-        });
-
         mRecyclerViewReadyCallback = new RecyclerViewReadyCallback() {
             @Override
             public void onLayoutReady() {
@@ -137,10 +115,38 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         setHasOptionsMenu(true);
 
+        setScrollListener(layoutManager);
+
         return root;
     }
 
+    private void setScrollListener(GridLayoutManager layoutManager) {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (isMoreFetchNeeded(visibleItemCount, totalItemCount, firstVisibleItemPosition) && !isLoading) {
+                    Log.e(LOG_TAG, "fetch more movies called");
+                    mPageToLoad++;
+                    fetchMoreMovies(mPageToLoad);
+                    isLoading = true;
+                }
+            }
+        });
+    }
+
     private void fetchFirstMovies() {
+        isLoading = true;
         mPageToLoad = 1;
         setLoadingIndicator(true);
         mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
@@ -153,7 +159,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {
         return (visibleItemCount + firstVisibleItemPosition) >= totalItemCount &&
-                firstVisibleItemPosition >= 0 && totalItemCount >= PAGE_SIZE;
+                firstVisibleItemPosition >= 0;
     }
 
     private void setupSharedPreferences() {
@@ -166,18 +172,18 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setupViewModel() {
         MoviesFragViewModelFactory factory =
                 InjectorUtils.provideMFViewModelFactory(mContext,
-                        mMoviesSortType, mIsNotPreferenceChange, mPageToLoad);
+                        mMoviesSortType, mIsNotPreferenceChange, mPageToLoad, this);
         mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
                 if (movies != null && movies.size() != 0) {
-                    isLoading = false;
                     mMovieAdapter.setMovieData(movies);
-                    //mSwipeRefreshLayout.setRefreshing(false);
+                    isLoading = false;
+                    mSwipeRefreshLayout.setRefreshing(false);
                     if (mPosition == RecyclerView.NO_POSITION) {
-                        mPosition = 0;
+                        //mPosition = 0;
                     } else {
                         //mRecyclerView.smoothScrollToPosition(mPosition);
                     }
@@ -232,7 +238,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //fetchFirstMovies();
+                fetchFirstMovies();
             }
         });
     }
@@ -278,14 +284,12 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             mMoviesSortType = sharedPreferences.getString(key,
                     getString(R.string.pref_sort_by_popularity_value));
         }
-        //mIsNotPreferenceChange = false;
-        /*mNumberOfPreferenceChange ++;
-        if (mNumberOfPreferenceChange == 1) {
-
-        } else {
-            mIsNotPreferenceChange = true;
-        }*/
         fetchFirstMovies();
+    }
+
+    @Override
+    public void onResponse() {
+        isLoading = false;
     }
 
     public interface RecyclerViewReadyCallback {

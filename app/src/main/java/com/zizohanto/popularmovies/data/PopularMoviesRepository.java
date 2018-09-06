@@ -28,15 +28,18 @@ public class PopularMoviesRepository {
     private final MovieDao mMovieDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
+    private final MovieNetworkDataSource.OnResponseListener mOnResponseListener;
     private boolean mInitialized = false;
     private boolean mIsNotPreferenceChange;
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
-                                    AppExecutors executors) {
+                                    AppExecutors executors,
+                                    MovieNetworkDataSource.OnResponseListener onResponseListener) {
         mMovieDao = movieDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
+        mOnResponseListener = onResponseListener;
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
@@ -75,12 +78,13 @@ public class PopularMoviesRepository {
 
     public synchronized static PopularMoviesRepository getInstance(
             MovieDao movieDao, MovieNetworkDataSource movieNetworkDataSource,
-            AppExecutors executors) {
+            AppExecutors executors,
+            MovieNetworkDataSource.OnResponseListener onResponseListener) {
         Log.d(LOG_TAG, "Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new PopularMoviesRepository(movieDao, movieNetworkDataSource,
-                        executors);
+                        executors, onResponseListener);
                 Log.d(LOG_TAG, "Made new repository");
             }
         }
@@ -132,12 +136,6 @@ public class PopularMoviesRepository {
     public LiveData<List<Movie>> getCurrentMovies() {
         Log.d(LOG_TAG, "Getting current movies: ");
         initializeData();
-        LiveData<List<Movie>> movies = mMovieDao.getAll();
-        if (movies.getValue() != null) {
-            for (int i = 0; i < movies.getValue().size(); i++) {
-                Log.e(LOG_TAG, movies.getValue().get(i).getTitle());
-            }
-        }
         return mMovieDao.getAll();
     }
 

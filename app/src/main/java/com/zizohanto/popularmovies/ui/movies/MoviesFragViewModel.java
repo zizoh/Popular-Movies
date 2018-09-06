@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModel;
 
 import com.zizohanto.popularmovies.data.PopularMoviesRepository;
 import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 
 import java.util.List;
 
@@ -14,13 +15,16 @@ public class MoviesFragViewModel extends ViewModel {
     private String mMoviesSortType;
     private Boolean mIsNotPreferenceChange;
     private int mPageToLoad;
+    private MovieNetworkDataSource.OnResponseListener mOnResponseListener;
 
     public MoviesFragViewModel(PopularMoviesRepository repository, String moviesSortType,
-                               Boolean isNotPreferenceChange, int pageToLoad) {
+                               Boolean isNotPreferenceChange, int pageToLoad,
+                               MovieNetworkDataSource.OnResponseListener onResponseListener) {
         mRepository = repository;
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
+        mOnResponseListener = onResponseListener;
         mRepository.setFetchCriteria(mMoviesSortType, mIsNotPreferenceChange, mPageToLoad);
         mMovies = mRepository.getCurrentMovies();
     }
