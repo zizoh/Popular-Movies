@@ -48,25 +48,29 @@ public class MovieNetworkDataSource {
     private static final Object LOCK = new Object();
     private static MovieNetworkDataSource sInstance;
     private final Context mContext;
+    private final MovieNetworkDataSource.OnResponseListener mOnResponseListener;
 
     // LiveData storing the latest downloaded movies data
     private final MutableLiveData<List<Movie>> mDownloadedMovies;
     private final AppExecutors mExecutors;
 
-    private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors) {
+    private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors,
+                                   MovieNetworkDataSource.OnResponseListener onResponseListener) {
         mContext = context;
         mExecutors = executors;
+        mOnResponseListener = onResponseListener;
         mDownloadedMovies = new MutableLiveData<List<Movie>>();
     }
 
     /**
      * Get the singleton for this class
      */
-    public static MovieNetworkDataSource getInstance(Context context, AppExecutors executors) {
+    public static MovieNetworkDataSource getInstance(Context context, AppExecutors executors,
+                                                     MovieNetworkDataSource.OnResponseListener onResponseListener) {
         Log.d(LOG_TAG, "Getting the network data source");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new MovieNetworkDataSource(context.getApplicationContext(), executors);
+                sInstance = new MovieNetworkDataSource(context.getApplicationContext(), executors, onResponseListener);
                 Log.d(LOG_TAG, "Made new network data source");
             }
         }
@@ -149,15 +153,21 @@ public class MovieNetworkDataSource {
                         } else {
                             Log.d(LOG_TAG, String.valueOf(response.errorBody()) + "Unknown error");
                         }
+                        mOnResponseListener.onResponse();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
                         // Log error here since request failed
                         Log.e(LOG_TAG, t.toString());
+                        mOnResponseListener.onResponse();
                     }
                 });
             }
         });
+    }
+
+    public interface OnResponseListener {
+        void onResponse();
     }
 }
