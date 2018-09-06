@@ -20,6 +20,7 @@ public class PopularMoviesRepository {
     private static final String LOG_TAG = PopularMoviesRepository.class.getSimpleName();
 
     private String mMoviesSortType;
+    private int mPageToLoad = 0;
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
@@ -47,9 +48,15 @@ public class PopularMoviesRepository {
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        // Deletes old historical data
-                        PopularMoviesRepository.this.deleteOldData();
-                        Log.d(LOG_TAG, "Old movies deleted");
+                        if (mPageToLoad <= 1) {
+                            // Deletes old historical data
+                            PopularMoviesRepository.this.deleteOldData();
+                            Log.e(LOG_TAG, "Old movies deleted");
+                        }
+                        for (int i = 0; i < newMoviesFromNetwork.size(); i++) {
+                            Log.e(LOG_TAG, newMoviesFromNetwork.get(i).getTitle());
+                        }
+
                         // Insert our new movie data into Popular Movie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Log.d(LOG_TAG, "New values inserted");
@@ -93,6 +100,9 @@ public class PopularMoviesRepository {
         }
         mInitialized = true;
         Log.d(LOG_TAG, "E don pass----------=");
+        mMovieNetworkDataSource.setFetchCriteria(mMoviesSortType, mPageToLoad);
+
+        // TODO: Remove sync scheduling
         createSyncTask();
         startFetchMoviesService();
     }
@@ -101,7 +111,6 @@ public class PopularMoviesRepository {
      * Method triggering Popular Movies to create its task to synchronize movie data periodically.
      */
     private void createSyncTask() {
-        mMovieNetworkDataSource.setSortingCriteria(mMoviesSortType);
         mMovieNetworkDataSource.scheduleRecurringFetchMoviesSync();
     }
 
@@ -123,6 +132,12 @@ public class PopularMoviesRepository {
     public LiveData<List<Movie>> getCurrentMovies() {
         Log.d(LOG_TAG, "Getting current movies: ");
         initializeData();
+        LiveData<List<Movie>> movies = mMovieDao.getAll();
+        if (movies.getValue() != null) {
+            for (int i = 0; i < movies.getValue().size(); i++) {
+                Log.e(LOG_TAG, movies.getValue().get(i).getTitle());
+            }
+        }
         return mMovieDao.getAll();
     }
 
@@ -131,8 +146,9 @@ public class PopularMoviesRepository {
         return mMovieDao.getMovieByTitle(title);
     }
 
-    public void setSortingCriteria(String moviesSortType, Boolean isNotPreferenceChange) {
+    public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
+        mPageToLoad = pageToLoad;
     }
 }
