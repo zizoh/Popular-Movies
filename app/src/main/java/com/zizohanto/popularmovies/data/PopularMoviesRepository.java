@@ -106,16 +106,7 @@ public class PopularMoviesRepository {
         Log.d(LOG_TAG, "E don pass----------=");
         mMovieNetworkDataSource.setFetchCriteria(mMoviesSortType, mPageToLoad);
 
-        // TODO: Remove sync scheduling
-        createSyncTask();
         startFetchMoviesService();
-    }
-
-    /**
-     * Method triggering Popular Movies to create its task to synchronize movie data periodically.
-     */
-    private void createSyncTask() {
-        mMovieNetworkDataSource.scheduleRecurringFetchMoviesSync();
     }
 
     /**

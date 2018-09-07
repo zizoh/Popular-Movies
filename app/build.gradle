@@ -45,9 +45,6 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterVersion"
 
-    // job scheduling
-    implementation "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
-
     // architecture components
     implementation "android.arch.lifecycle:runtime:$archComponentsVersion"
     implementation "android.arch.lifecycle:extensions:$archComponentsVersion"

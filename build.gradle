@@ -27,8 +27,6 @@ ext {
     retrofitConverterVersion = "2.0.2"
     gsonVersion = "2.8.2"
     picassoVersion = "2.5.2"
-    firebaseJobdispatcherVersion = "0.7.0"
-    okhttpLoggingInterceptorVersion = "3.9.0"
 
     junitVersion = "4.12"
     supportTestVersion = "1.0.2"
