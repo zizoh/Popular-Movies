@@ -85,7 +85,7 @@ public class MovieNetworkDataSource {
     /**
      * Get movies
      */
-    void fetchMovies(String moviesSortType, int pageToLoad) {
+    void fetchMovies(@NonNull String moviesSortType, int pageToLoad) {
         Log.d(LOG_TAG, "Fetch movies started");
         mExecutors.networkIO().execute(new Runnable() {
             @Override

@@ -4,10 +4,12 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
@@ -46,6 +48,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         final String baseUrl = "http://image.tmdb.org/t/p/";
 
         final String posterSize = "w185/";
+        String newString = (baseUrl + posterSize + filePath);
+        Log.e("MovieAdapter", newString);
 
         return new String(baseUrl + posterSize + filePath);
     }
@@ -64,13 +68,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         Movie movie = mMovies.get(position);
 
-        String posterUrl = movie.getPosterPath();
-
-        Picasso.with(mContext)
-                .load(buildCompletePosterUrl(posterUrl))
-                .error(mContext.getResources().getDrawable(R.drawable.no_image))
-                .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
-                .into(holder.mMoviePoster);
+        holder.bind(movie);
 
     }
 
@@ -123,11 +121,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView mMoviePoster;
+        private TextView mMovieTitle;
 
         private MovieAdapterViewHolder(View itemView) {
             super(itemView);
 
-            mMoviePoster = (ImageView) itemView.findViewById(R.id.iv_movie_poster);
+            mMoviePoster = (ImageView) itemView.findViewById(R.id.iv_backdrop_image);
+            mMovieTitle = (TextView) itemView.findViewById(R.id.tv_movie_title);
             itemView.setOnClickListener(this);
         }
 
@@ -138,10 +138,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             mOnClickListener.onMovieClick(movieTitle);
         }
 
-        private void bind(String posterUrl) {
+        public void bind(Movie movie) {
+            String posterUrl = movie.getPosterPath();
+
             Picasso.with(mContext)
-                    .load(posterUrl)
+                    .load(buildCompletePosterUrl(posterUrl))
+                    .error(mContext.getResources().getDrawable(R.drawable.no_image))
+                    .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
                     .into(mMoviePoster);
+
+            mMovieTitle.setText(movie.getTitle());
         }
     }
 }

@@ -3,69 +3,134 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp">
+        android:background="@color/colorPrimary">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary">
 
             <ImageView
-                android:id="@+id/iv_movie_poster"
-                android:layout_width="wrap_content"
+                android:id="@+id/iv_backdrop_image"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:adjustViewBounds="false"
+                android:background="@color/colorPrimary"
                 android:contentDescription="@string/image_placeholder"
+                android:scaleType="center"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:src="@drawable/the_meg_poster" />
 
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
+            <android.support.v7.widget.CardView
+                android:id="@+id/cv_tv_title"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@id/iv_movie_poster"
-                app:layout_constraintTop_toTopOf="@id/iv_movie_poster"
-                tools:text="@string/details_frag_tv_title" />
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                app:cardBackgroundColor="@color/colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_backdrop_image">
 
-            <TextView
-                android:id="@+id/tv_release_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="@+id/tv_title"
-                app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                tools:text="@string/details_frag_tv_release_date" />
+                <TextView
+                    android:id="@+id/tv_title"
+                    style="@style/TextViewTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:textSize="24sp"
+                    tools:text="@string/tv_title" />
 
-            <TextView
-                android:id="@+id/tv_vote_average"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="@+id/tv_release_date"
-                app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
-                tools:text="@string/details_frag_tv_vote_average" />
+            </android.support.v7.widget.CardView>
 
-            <TextView
-                android:id="@+id/tv_popularity"
-                android:layout_width="wrap_content"
+            <android.support.v7.widget.CardView
+                android:id="@+id/cv_rating"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="@+id/tv_vote_average"
-                app:layout_constraintTop_toBottomOf="@+id/tv_vote_average"
-                tools:text="@string/details_frag_tv_popularity" />
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:orientation="horizontal"
+                app:cardBackgroundColor="@color/colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cv_tv_title">
 
-            <TextView
-                android:id="@+id/tv_plot_synopsis"
-                android:layout_width="wrap_content"
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary">
+
+                    <android.support.v7.widget.AppCompatRatingBar
+                        android:id="@+id/rating"
+                        style="@style/Base.Widget.AppCompat.RatingBar.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:numStars="5"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="8dp"
+                        android:stepSize="0.01"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_popularity"
+                        style="@style/TextViewTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/rating"
+                        app:layout_constraintStart_toEndOf="@+id/rating"
+                        app:layout_constraintTop_toTopOf="@+id/rating"
+                        tools:text="@string/tv_popularity" />
+
+                    <TextView
+                        android:id="@+id/tv_release_year"
+                        style="@style/TextViewTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:layout_constraintStart_toEndOf="@+id/tv_popularity"
+                        app:layout_constraintTop_toTopOf="@+id/tv_popularity"
+                        tools:text="@string/tv_release_date" />
+
+                </android.support.constraint.ConstraintLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/cv_plot_synopsis"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/details_frag_tv_plot_synopsis"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/iv_movie_poster" />
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:background="@color/colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cv_rating">
+
+                <TextView
+                    android:id="@+id/tv_plot_synopsis"
+                    style="@style/TextViewTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    tools:text="@string/tv_plot_synopsis" />
+
+            </android.support.v7.widget.CardView>
 
         </android.support.constraint.ConstraintLayout>
 
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
 </layout>

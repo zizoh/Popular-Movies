@@ -4,9 +4,12 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,19 +41,26 @@ public class DetailsFragment extends Fragment {
 
     }
 
-    private static String buildCompletePosterUrl(String filePath) {
+    private static String buildCompleteBackdropUrl(String filePath) {
 
         final String baseUrl = "http://image.tmdb.org/t/p/";
 
-        final String posterSize = "w185/";
+        final String backdropImageSize = "w500/";
 
-        return new String(baseUrl + posterSize + filePath);
+        return String.format("%s%s%s", baseUrl, backdropImageSize, filePath);
+    }
+
+    private void setupViewModel(String title) {
+        DetailsFragViewModelFactory factory = InjectorUtils.
+                provideDFViewModelFactory(mContext, title);
+        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 
     @Override
     public View onCreateView(@Nullable LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        assert inflater != null;
         mDetailsFragBinding = DataBindingUtil.inflate(inflater, R.layout.details_frag, container, false);
         View root = mDetailsFragBinding.getRoot();
         mContext = getActivity();
@@ -67,22 +77,31 @@ public class DetailsFragment extends Fragment {
                 if (null != movie) {
                     String posterUrl = movie.getPosterPath();
                     Picasso.with(mContext)
-                            .load(buildCompletePosterUrl(posterUrl))
+                            .load(buildCompleteBackdropUrl(posterUrl))
                             .error(mContext.getResources().getDrawable(R.drawable.no_image))
                             .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
-                            .into(mDetailsFragBinding.ivMoviePoster);
+                            .into(mDetailsFragBinding.ivBackdropImage);
 
                     String title = movie.getTitle();
                     mDetailsFragBinding.tvTitle.setText(title);
 
-                    String releaseDate = movie.getReleaseDate();
-                    mDetailsFragBinding.tvReleaseDate.setText(releaseDate);
+                    LayerDrawable layerDrawable = (LayerDrawable) mDetailsFragBinding.rating.getProgressDrawable();
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(0)), Color.WHITE);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(1)), Color.YELLOW);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(2)), Color.YELLOW);
 
-                    String voteAverage = String.valueOf(movie.getVoteAverage());
-                    mDetailsFragBinding.tvVoteAverage.setText(voteAverage);
+                    Double voteAverage = movie.getVoteAverage();
+                    float d = (float) (voteAverage / 2);
+
+                    mDetailsFragBinding.rating.setRating(d);
 
                     String popularity = String.valueOf(movie.getPopularity());
-                    mDetailsFragBinding.tvPopularity.setText(popularity);
+                    mDetailsFragBinding.tvPopularity.setText(
+                            String.format("(%s)", popularity));
+
+                    String releaseDate = movie.getReleaseDate();
+                    String releaseYear = releaseDate.substring(0, 4);
+                    mDetailsFragBinding.tvReleaseYear.setText(String.format("Released: %s", releaseYear));
 
                     String synopsis = movie.getOverview();
                     mDetailsFragBinding.tvPlotSynopsis.setText(synopsis);
@@ -91,11 +110,5 @@ public class DetailsFragment extends Fragment {
         });
 
         return root;
-    }
-
-    private void setupViewModel(String title) {
-        DetailsFragViewModelFactory factory = InjectorUtils.
-                provideDFViewModelFactory(mContext, title);
-        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 }

@@ -22,7 +22,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
@@ -51,7 +50,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private MoviesFragViewModel mViewModel;
     private RecyclerView mRecyclerView;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerViewReadyCallback mRecyclerViewReadyCallback;
     private SharedPreferences sharedPreferences;
 
 
@@ -90,24 +88,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mMovieAdapter = new MovieAdapter(mContext, this);
 
         mRecyclerView.setAdapter(mMovieAdapter);
-
-        mRecyclerViewReadyCallback = new RecyclerViewReadyCallback() {
-            @Override
-            public void onLayoutReady() {
-                setLoadingIndicator(false);
-            }
-        };
-
-        mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (null != mRecyclerViewReadyCallback) {
-                    mRecyclerViewReadyCallback.onLayoutReady();
-                } else {
-                    mRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
-            }
-        });
 
         setupViewModel();
 
@@ -180,17 +160,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             public void onChanged(@Nullable List<Movie> movies) {
                 if (movies != null && movies.size() != 0) {
                     mMovieAdapter.setMovieData(movies);
-                    isLoading = false;
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    if (mPosition == RecyclerView.NO_POSITION) {
-                        //mPosition = 0;
-                    } else {
-                        //mRecyclerView.smoothScrollToPosition(mPosition);
-                    }
-                    //MoviesFragment.this.setLoadingIndicator(false);
-                } else {
-                    //setLoadingIndicator(true);
                 }
+                isLoading = false;
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
     }
@@ -244,7 +216,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     public void setLoadingIndicator(final boolean active) {
-        // setRefreshing() is called after the layout is done with everything else.
+        // setRefreshing() is called after the toolbar is done with everything else.
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
@@ -290,10 +262,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onResponse() {
         isLoading = false;
-    }
-
-    public interface RecyclerViewReadyCallback {
-        void onLayoutReady();
     }
 
     @Override
