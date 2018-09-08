@@ -17,9 +17,9 @@ public class MoviesFragViewModel extends ViewModel {
     private int mPageToLoad;
     private MovieNetworkDataSource.OnResponseListener mOnResponseListener;
 
-    public MoviesFragViewModel(PopularMoviesRepository repository, String moviesSortType,
-                               Boolean isNotPreferenceChange, int pageToLoad,
-                               MovieNetworkDataSource.OnResponseListener onResponseListener) {
+    MoviesFragViewModel(PopularMoviesRepository repository, String moviesSortType,
+                        Boolean isNotPreferenceChange, int pageToLoad,
+                        MovieNetworkDataSource.OnResponseListener onResponseListener) {
         mRepository = repository;
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;

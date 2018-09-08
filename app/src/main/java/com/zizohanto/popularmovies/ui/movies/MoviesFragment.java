@@ -15,7 +15,6 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,19 +30,16 @@ import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener,
         MovieNetworkDataSource.OnResponseListener {
-    private static final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
-    private int mPosition = RecyclerView.NO_POSITION;
-    private static final int PAGE_SIZE = 20;
     public static final String MOST_POPULAR_MOVIES = "movie/popular";
     private String mMoviesSortType;
-    private boolean mIsNotPreferenceChange = true;
     private boolean isLoading;
     private int mPageToLoad = 1;
     private MovieAdapter mMovieAdapter;
@@ -75,7 +71,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mSwipeRefreshLayout =
                 (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
 
-        // Set up tasks view
+        // Set up movies view
         mRecyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
 
         GridLayoutManager layoutManager = new GridLayoutManager(mContext, 2);
@@ -116,10 +112,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
                 if (isMoreFetchNeeded(visibleItemCount, totalItemCount, firstVisibleItemPosition) && !isLoading) {
-                    Log.e(LOG_TAG, "fetch more movies called");
                     mPageToLoad++;
-                    fetchMoreMovies(mPageToLoad);
                     isLoading = true;
+                    fetchMoreMovies(mPageToLoad);
                 }
             }
         });
@@ -152,7 +147,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setupViewModel() {
         MoviesFragViewModelFactory factory =
                 InjectorUtils.provideMFViewModelFactory(mContext,
-                        mMoviesSortType, mIsNotPreferenceChange, mPageToLoad, this);
+                        mMoviesSortType, true, mPageToLoad, this);
         mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
@@ -168,7 +163,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     private void showSortingPopUpMenu() {
-        PopupMenu popup = new PopupMenu(mContext, getActivity().findViewById(R.id.menu_filter));
+        PopupMenu popup = new PopupMenu(mContext, Objects.requireNonNull(getActivity()).findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
         if (MOST_POPULAR_MOVIES.equals(mMoviesSortType)) {
@@ -262,6 +257,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onResponse() {
         isLoading = false;
+        setLoadingIndicator(false);
     }
 
     @Override
