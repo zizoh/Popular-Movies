@@ -9,7 +9,7 @@ import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 
 /**
  * Factory method that to create a ViewModel with a constructor that takes a
- * {@link com.zizohanto.popularmovies.data.PopularMoviesRepository}
+ * {@link PopularMoviesRepository}
  */
 public class MoviesFragViewModelFactory extends ViewModelProvider.NewInstanceFactory {
     private final PopularMoviesRepository mRepository;

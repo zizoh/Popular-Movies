@@ -2,14 +2,13 @@ package com.zizohanto.popularmovies.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-@Entity(tableName = "movie", indices = {@Index(value = {"title"}, unique = true)})
+@Entity(tableName = "movie")
 public class Movie {
 
     @PrimaryKey(autoGenerate = true)

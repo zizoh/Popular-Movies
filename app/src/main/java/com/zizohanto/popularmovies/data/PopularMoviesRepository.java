@@ -19,16 +19,16 @@ import java.util.List;
 public class PopularMoviesRepository {
     private static final String LOG_TAG = PopularMoviesRepository.class.getSimpleName();
 
-    private String mMoviesSortType;
-    private int mPageToLoad = 0;
-
     // For Singleton instantiation
     private static final Object LOCK = new Object();
     private static PopularMoviesRepository sInstance;
     private final MovieDao mMovieDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
-    private final MovieNetworkDataSource.OnResponseListener mOnResponseListener;
+
+
+    private String mMoviesSortType;
+    private int mPageToLoad = 0;
     private boolean mInitialized = false;
     private boolean mIsNotPreferenceChange;
 
@@ -39,7 +39,7 @@ public class PopularMoviesRepository {
         mMovieDao = movieDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
-        mOnResponseListener = onResponseListener;
+        MovieNetworkDataSource.OnResponseListener mOnResponseListener = onResponseListener;
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
@@ -54,9 +54,9 @@ public class PopularMoviesRepository {
                         if (mPageToLoad <= 1) {
                             // Deletes old historical data
                             PopularMoviesRepository.this.deleteOldData();
-                            Log.e(LOG_TAG, "Old movies deleted");
+                            Log.d(LOG_TAG, "Old movies deleted");
                         }
-                        // Insert our new movie data into Popular Movie's database
+                        // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Log.d(LOG_TAG, "New values inserted");
                     }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +18,11 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
-    private static final String TAG = MovieAdapter.class.getSimpleName();
-
     private List<Movie> mMovies;
     private Context mContext;
     private MovieItemClickListener mOnClickListener;
 
-    public MovieAdapter(Context context, MovieItemClickListener listener) {
+    MovieAdapter(Context context, MovieItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
     }
@@ -48,10 +45,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         final String baseUrl = "http://image.tmdb.org/t/p/";
 
         final String posterSize = "w185/";
-        String newString = (baseUrl + posterSize + filePath);
-        Log.e("MovieAdapter", newString);
 
-        return new String(baseUrl + posterSize + filePath);
+        return String.format("%s%s%s", baseUrl, posterSize, filePath);
     }
 
     @Override
@@ -73,17 +68,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieData(List<Movie> newMovies) {
-        // If there was no forecast data, then recreate all of the list
+        // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
         } else {
-            /*
-             * Otherwise we use DiffUtil to calculate the changes and update accordingly. This
-             * shows the four methods you need to override to return a DiffUtil callback. The
-             * old list is the current list stored in mForecast, where the new list is the new
-             * values passed in from the observing the database.
-             */
-
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
                 public int getOldListSize() {
@@ -138,7 +126,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             mOnClickListener.onMovieClick(movieTitle);
         }
 
-        public void bind(Movie movie) {
+        void bind(Movie movie) {
             String posterUrl = movie.getPosterPath();
 
             Picasso.with(mContext)
