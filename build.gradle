@@ -22,7 +22,6 @@ ext {
     supportLibVersion = "27.1.1"
     constraintLayoutVersion = "1.1.3"
     archComponentsVersion = "1.1.1"
-    pagingVersion = "1.0.1"
     retrofitVersion = "2.3.0"
     retrofitConverterVersion = "2.0.2"
     gsonVersion = "2.8.2"

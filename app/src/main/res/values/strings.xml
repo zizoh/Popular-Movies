@@ -5,12 +5,12 @@
     <string name="nav_most_popular">Most Popular</string>
     <string name="nav_highest_rated">Top Rated</string>
     <string name="movie_poster">Movie poster</string>
-    <string name="details_frag_tv_title">The Meg</string>
-    <string name="details_frag_tv_vote_average">6.6</string>
-    <string name="details_frag_tv_release_date">2018–08–09</string>
-    <string name="details_frag_tv_plot_synopsis">A deep sea submersible pilot revisits his past fears in the Mariana Trench, and accidentally unleashes the seventy foot ancestor of the Great White Shark believed to be extinct.</string>
-    <string name="details_frag_tv_popularity">127.639</string>
-    <string name="image_placeholder">Image Placeholder</string>
+    <string name="tv_title">The Meg</string>
+    <string name="tv_vote_average">6.6</string>
+    <string name="tv_release_date">Released: 2018</string>
+    <string name="tv_plot_synopsis">A deep sea submersible pilot revisits his past fears in the Mariana Trench, and accidentally unleashes the seventy foot ancestor of the Great White Shark believed to be extinct.</string>
+    <string name="tv_popularity">(127.639)</string>
+    <string name="image_placeholder">Movie Poster</string>
 
     <!-- Key name for storing sort-by in SharedPreferences -->
     <string name="pref_key_sort_by" translatable="false">Sort-by</string>

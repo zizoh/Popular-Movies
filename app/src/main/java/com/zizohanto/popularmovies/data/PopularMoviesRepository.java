@@ -56,10 +56,6 @@ public class PopularMoviesRepository {
                             PopularMoviesRepository.this.deleteOldData();
                             Log.e(LOG_TAG, "Old movies deleted");
                         }
-                        for (int i = 0; i < newMoviesFromNetwork.size(); i++) {
-                            Log.e(LOG_TAG, newMoviesFromNetwork.get(i).getTitle());
-                        }
-
                         // Insert our new movie data into Popular Movie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Log.d(LOG_TAG, "New values inserted");
@@ -99,11 +95,9 @@ public class PopularMoviesRepository {
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, nothing is done in this method.
         if (mInitialized && mIsNotPreferenceChange) {
-            Log.d(LOG_TAG, "E no go pass+++++++++++++=");
             return;
         }
         mInitialized = true;
-        Log.d(LOG_TAG, "E don pass----------=");
         mMovieNetworkDataSource.setFetchCriteria(mMoviesSortType, mPageToLoad);
 
         startFetchMoviesService();
