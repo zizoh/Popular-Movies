@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.zizohanto.popularmovies.AppExecutors;
+import com.zizohanto.popularmovies.BuildConfig;
 import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.data.database.MovieResponse;
 
@@ -25,7 +26,7 @@ public class MovieNetworkDataSource {
     private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
     public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
-    private static final String API_KEY = "30e6ddb8d33a868f0c63e40f647ea1a6";
+    private static final String API_KEY = BuildConfig.ApiKey;
     private int mPageToLoad;
     private String mMoviesSortType;
 
@@ -114,7 +115,6 @@ public class MovieNetworkDataSource {
 
                     @Override
                     public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                        // Log error here since request failed
                         Log.e(LOG_TAG, t.toString());
                         mOnResponseListener.onResponse();
                     }
