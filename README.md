@@ -1,28 +1,31 @@
 # Popular Movies App
 
 ## Project Overview
-App to allow users discover the most popular movies playing. Popular movies are gotten from themoviedb.org API.
+App allows users discover the most popular and top rated movies playing. Movies are gotten from themoviedb.org API.
 
-## Why this Project
+## Getting Started
 
-Building a layout and populating its fields from data received as JSON
-is a common task for Android Developers. Although JSON parsing is usually
-done using libraries, writing the JSON parsing for this project will
-help one understand better how it is processed.
+The app uses the Gradle build system. To build this project, use the
+"gradlew build" command or use "Import Project" in Android Studio.
 
-## What Will I Learn?
-Through this project, I will:
-- Learn how to submit projects for review
-- Practice JSON parsing to a model object
-- Design an activity layout
-- Populate all fields in the layout accordingly
+You will need an API key from themoviedb.org to request data. If you don’t already have an account, you will need to [create one](https://www.google.com/url?q=https://www.themoviedb.org/account/signup&sa=D&ust=1533333489625000) in order to
+                                                                           request an API Key.
+Use your API key as the value for API_KEY in the file popularmovies/data/network/MovieNetworkDataSource.java.
 
-## How Do I Complete this Project?
-Download the [Sandwich Club app starter code.](https://github.com/udacity/sandwich-club-starter-code)
+## Prerequisites
 
-Design the layout for the detail activity so the different elements
-display in a sensible way. Implement the JSON parsing in JsonUtils so it
-produces a Sandwich Object that can be used to populate the UI that I designed.
+- Android SDK v27
+- Android Build Tools v27.0.3
+- Android Support Repository v27.1.1
+- Gradle 3.1.4
+
+## Author
+
+Zizoh Anto
+
+## License
+
+This project is licensed under the Apache License 2.0 - See: http://www.apache.org/licenses/LICENSE-2.0.txt
 
 ## Screenshot
-<img src="screenshot/1_SandwichList.png" height="400" alt="Screenshot"/> <img src="screenshot/2_SandwichDetail.png" height="400" alt="Screenshot"/>
+<img src="screenshot/1_MoviesList.png" height="400" alt="Screenshot"/> <img src="screenshot/2_MovieDetail.png" height="400" alt="Screenshot"/>

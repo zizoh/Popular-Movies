@@ -61,5 +61,4 @@ dependencies {
     testImplementation "com.android.support.test:runner:$supportTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
 
-    // TODO: Clean unused dependencies
 }
