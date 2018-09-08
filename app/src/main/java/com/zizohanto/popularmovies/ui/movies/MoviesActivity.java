@@ -41,7 +41,7 @@ public class MoviesActivity extends AppCompatActivity {
     // TODOC 8: In a background thread, app queries the /movie/popular or /movie/top_rated API for
     // the sort criteria specified in the settings menu.
 
-    // TODO 9: Remove API Key before sharing code publicly
-    // TODO 10: App does not crash when there is no network connection
+    // TODOC 9: Remove API Key before sharing code publicly
+    // TODOC 10: App does not crash when there is no network connection
     // TODO 11: Use timber for logging
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Popular Movies App</string>
+    <string name="app_name">Popular Movies</string>
     <string name="menu_filter">Filter</string>
     <string name="refresh">Refresh</string>
     <string name="nav_most_popular">Most Popular</string>
