@@ -26,6 +26,7 @@ ext {
     retrofitConverterVersion = "2.0.2"
     gsonVersion = "2.8.2"
     picassoVersion = "2.5.2"
+    timberLogging = "4.7.0"
 
     junitVersion = "4.12"
     supportTestVersion = "1.0.2"

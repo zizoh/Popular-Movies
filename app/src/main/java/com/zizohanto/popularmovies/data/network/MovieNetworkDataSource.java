@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.BuildConfig;
@@ -17,15 +16,15 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * Provides an API for doing all operations with the server data
  */
 public class MovieNetworkDataSource {
 
-    private static final String LOG_TAG = MovieNetworkDataSource.class.getSimpleName();
-    public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
-    public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
+    private static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
+    private static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
     private static final String API_KEY = BuildConfig.ApiKey;
     private int mPageToLoad;
     private String mMoviesSortType;
@@ -53,11 +52,11 @@ public class MovieNetworkDataSource {
      */
     public static MovieNetworkDataSource getInstance(Context context, AppExecutors executors,
                                                      MovieNetworkDataSource.OnResponseListener onResponseListener) {
-        Log.d(LOG_TAG, "Getting the network data source");
+        Timber.d("Getting the network data source");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new MovieNetworkDataSource(context.getApplicationContext(), executors, onResponseListener);
-                Log.d(LOG_TAG, "Made new network data source");
+                Timber.d("Made new network data source");
             }
         }
         return sInstance;
@@ -75,7 +74,7 @@ public class MovieNetworkDataSource {
         intentToFetch.putExtra(CURRENT_SORTING_KEY, mMoviesSortType);
         intentToFetch.putExtra(PAGE_TO_LOAD_KEY, mPageToLoad);
         mContext.startService(intentToFetch);
-        Log.d(LOG_TAG, "Service created");
+        Timber.d("Service created");
     }
 
     public void setFetchCriteria(String moviesSortType, int pageToLoad) {
@@ -87,7 +86,7 @@ public class MovieNetworkDataSource {
      * Get movies
      */
     void fetchMovies(@NonNull String moviesSortType, int pageToLoad) {
-        Log.d(LOG_TAG, "Fetch movies started");
+        Timber.d("Fetch movies started");
         mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -102,20 +101,20 @@ public class MovieNetworkDataSource {
                 call.enqueue(new Callback<MovieResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                        Log.d(LOG_TAG, "got a response " + response);
+                        Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
                             List<Movie> movies = response.body().getMovies();
                             mDownloadedMovies.postValue(response.body().getMovies());
-                            Log.d(LOG_TAG, "Number of movies received: " + movies.size());
+                            Timber.d("Number of movies received: %s", movies.size());
                         } else {
-                            Log.d(LOG_TAG, String.valueOf(response.errorBody()) + "Unknown error");
+                            Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
                         }
                         mOnResponseListener.onResponse();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                        Log.e(LOG_TAG, t.toString());
+                        Timber.e(t.toString());
                         mOnResponseListener.onResponse();
                     }
                 });

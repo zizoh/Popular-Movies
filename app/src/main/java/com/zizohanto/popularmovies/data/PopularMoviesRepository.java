@@ -3,7 +3,6 @@ package com.zizohanto.popularmovies.data;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.database.Movie;
@@ -12,12 +11,13 @@ import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Handles data operations in Popular movies. Acts as a mediator between {@link MovieNetworkDataSource}
  * and {@link MovieDao}
  */
 public class PopularMoviesRepository {
-    private static final String LOG_TAG = PopularMoviesRepository.class.getSimpleName();
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
@@ -25,7 +25,6 @@ public class PopularMoviesRepository {
     private final MovieDao mMovieDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
-
 
     private String mMoviesSortType;
     private int mPageToLoad = 0;
@@ -54,11 +53,11 @@ public class PopularMoviesRepository {
                         if (mPageToLoad <= 1) {
                             // Deletes old historical data
                             PopularMoviesRepository.this.deleteOldData();
-                            Log.d(LOG_TAG, "Old movies deleted");
+                            Timber.d("Old movies deleted");
                         }
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
-                        Log.d(LOG_TAG, "New values inserted");
+                        Timber.d("New values inserted");
                     }
                 });
             }
@@ -76,12 +75,12 @@ public class PopularMoviesRepository {
             MovieDao movieDao, MovieNetworkDataSource movieNetworkDataSource,
             AppExecutors executors,
             MovieNetworkDataSource.OnResponseListener onResponseListener) {
-        Log.d(LOG_TAG, "Getting the repository");
+        Timber.d("Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new PopularMoviesRepository(movieDao, movieNetworkDataSource,
                         executors, onResponseListener);
-                Log.d(LOG_TAG, "Made new repository");
+                Timber.d("Made new repository");
             }
         }
         return sInstance;
@@ -119,7 +118,7 @@ public class PopularMoviesRepository {
      * Database related operations
      */
     public LiveData<List<Movie>> getCurrentMovies() {
-        Log.d(LOG_TAG, "Getting current movies: ");
+        Timber.d("Getting current movies: ");
         initializeData();
         return mMovieDao.getAll();
     }
