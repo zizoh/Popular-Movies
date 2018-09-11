@@ -5,13 +5,13 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
-import android.util.Log;
+
+import timber.log.Timber;
 
 @Database(entities = {Movie.class}, version = 1)
 @TypeConverters(ListTypeConverter.class)
 public abstract class PopularMovieDatabase extends RoomDatabase {
 
-    private static final String LOG_TAG = PopularMovieDatabase.class.getSimpleName();
     private static final String DATABASE_NAME = "movie";
 
     // For Singleton instantiation
@@ -19,12 +19,12 @@ public abstract class PopularMovieDatabase extends RoomDatabase {
     private static PopularMovieDatabase sInstance;
 
     public static PopularMovieDatabase getInstance(Context context) {
-        Log.d(LOG_TAG, "Getting the database");
+        Timber.d("Getting the database");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         PopularMovieDatabase.class, PopularMovieDatabase.DATABASE_NAME).build();
-                Log.d(LOG_TAG, "Made new database");
+                Timber.d("Made new database");
             }
         }
         return sInstance;

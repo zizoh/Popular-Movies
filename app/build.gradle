@@ -51,6 +51,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterVersion"
 
+    // for logging
+    implementation "com.jakewharton.timber:timber:$timberLogging"
+
     // architecture components
     implementation "android.arch.lifecycle:runtime:$archComponentsVersion"
     implementation "android.arch.lifecycle:extensions:$archComponentsVersion"
