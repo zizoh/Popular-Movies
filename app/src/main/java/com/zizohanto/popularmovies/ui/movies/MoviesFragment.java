@@ -21,20 +21,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.Movie;
-import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
 import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
+import com.zizohanto.popularmovies.utils.NetworkState;
 
 import java.util.List;
 import java.util.Objects;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener,
-        MovieNetworkDataSource.OnResponseListener {
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
@@ -147,7 +147,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setupViewModel() {
         MoviesFragViewModelFactory factory =
                 InjectorUtils.provideMFViewModelFactory(mContext,
-                        mMoviesSortType, true, mPageToLoad, this);
+                        mMoviesSortType, true, mPageToLoad);
         mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
 
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
@@ -158,6 +158,29 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 }
                 isLoading = false;
                 mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(@Nullable NetworkState networkState) {
+
+                setLoadingIndicator(false);
+
+                if (networkState != null && networkState.getStatus() == NetworkState.Status.RUNNING) {
+                    isLoading = true;
+                    setLoadingIndicator(true);
+                } else {
+                    isLoading = false;
+                    setLoadingIndicator(false);
+                }
+
+                if (networkState != null && networkState.getStatus() == NetworkState.Status.FAILED) {
+                    isLoading = false;
+                    setLoadingIndicator(false);
+                    Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
+                    //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -252,12 +275,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                     getString(R.string.pref_sort_by_popularity_value));
         }
         fetchFirstMovies();
-    }
-
-    @Override
-    public void onResponse() {
-        isLoading = false;
-        setLoadingIndicator(false);
     }
 
     @Override

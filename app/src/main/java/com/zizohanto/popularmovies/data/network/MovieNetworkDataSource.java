@@ -10,6 +10,7 @@ import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.BuildConfig;
 import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.data.database.MovieResponse;
+import com.zizohanto.popularmovies.utils.NetworkState;
 
 import java.util.List;
 
@@ -33,29 +34,28 @@ public class MovieNetworkDataSource {
     private static final Object LOCK = new Object();
     private static MovieNetworkDataSource sInstance;
     private final Context mContext;
-    private final MovieNetworkDataSource.OnResponseListener mOnResponseListener;
+    private final AppExecutors mExecutors;
 
     // LiveData storing the latest downloaded movies data
     private final MutableLiveData<List<Movie>> mDownloadedMovies;
-    private final AppExecutors mExecutors;
 
-    private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors,
-                                   MovieNetworkDataSource.OnResponseListener onResponseListener) {
+    private final MutableLiveData<NetworkState> networkState;
+
+    private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors) {
         mContext = context;
         mExecutors = executors;
-        mOnResponseListener = onResponseListener;
         mDownloadedMovies = new MutableLiveData<List<Movie>>();
+        networkState = new MutableLiveData<NetworkState>();
     }
 
     /**
      * Get the singleton for this class
      */
-    public static MovieNetworkDataSource getInstance(Context context, AppExecutors executors,
-                                                     MovieNetworkDataSource.OnResponseListener onResponseListener) {
+    public static MovieNetworkDataSource getInstance(Context context, AppExecutors executors) {
         Timber.d("Getting the network data source");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new MovieNetworkDataSource(context.getApplicationContext(), executors, onResponseListener);
+                sInstance = new MovieNetworkDataSource(context.getApplicationContext(), executors);
                 Timber.d("Made new network data source");
             }
         }
@@ -64,6 +64,10 @@ public class MovieNetworkDataSource {
 
     public LiveData<List<Movie>> getTodaysMoviesData() {
         return mDownloadedMovies;
+    }
+
+    public MutableLiveData<NetworkState> getNetworkState() {
+        return networkState;
     }
 
     /**
@@ -90,39 +94,45 @@ public class MovieNetworkDataSource {
         mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
+                networkState.postValue(NetworkState.LOADING);
+
                 ApiInterface apiService = ApiClient.getClient();
                 Call<MovieResponse> call;
 
-                if (moviesSortType.equals("movie/popular")) {
-                    call = apiService.getPopularMovies(API_KEY, pageToLoad);
-                } else {
-                    call = apiService.getTopRatedMovies(API_KEY, pageToLoad);
-                }
+                call = getMovieResponseCall(apiService, moviesSortType, pageToLoad);
                 call.enqueue(new Callback<MovieResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                         Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
                             List<Movie> movies = response.body().getMovies();
-                            mDownloadedMovies.postValue(response.body().getMovies());
                             Timber.d("Number of movies received: %s", movies.size());
+                            mDownloadedMovies.postValue(response.body().getMovies());
+                            networkState.postValue(NetworkState.LOADED);
                         } else {
                             Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
+                            networkState.postValue(new NetworkState(NetworkState.Status.FAILED, response.message()));
                         }
-                        mOnResponseListener.onResponse();
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
                         Timber.e(t.toString());
-                        mOnResponseListener.onResponse();
+                        networkState.postValue(new NetworkState(NetworkState.Status.FAILED, t.getMessage()));
                     }
                 });
             }
         });
     }
 
-    public interface OnResponseListener {
-        void onResponse();
+    private Call<MovieResponse> getMovieResponseCall(ApiInterface apiService,
+                                                     @NonNull String moviesSortType, int pageToLoad) {
+        Call<MovieResponse> call;
+        if (moviesSortType.equals("movie/popular")) {
+            call = apiService.getPopularMovies(API_KEY, pageToLoad);
+        } else {
+            call = apiService.getTopRatedMovies(API_KEY, pageToLoad);
+        }
+        return call;
     }
 }

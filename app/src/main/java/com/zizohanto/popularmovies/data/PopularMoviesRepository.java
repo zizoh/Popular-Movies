@@ -8,6 +8,7 @@ import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.database.Movie;
 import com.zizohanto.popularmovies.data.database.MovieDao;
 import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
+import com.zizohanto.popularmovies.utils.NetworkState;
 
 import java.util.List;
 
@@ -33,12 +34,10 @@ public class PopularMoviesRepository {
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
-                                    AppExecutors executors,
-                                    MovieNetworkDataSource.OnResponseListener onResponseListener) {
+                                    AppExecutors executors) {
         mMovieDao = movieDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
-        MovieNetworkDataSource.OnResponseListener mOnResponseListener = onResponseListener;
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
@@ -73,13 +72,12 @@ public class PopularMoviesRepository {
 
     public synchronized static PopularMoviesRepository getInstance(
             MovieDao movieDao, MovieNetworkDataSource movieNetworkDataSource,
-            AppExecutors executors,
-            MovieNetworkDataSource.OnResponseListener onResponseListener) {
+            AppExecutors executors) {
         Timber.d("Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new PopularMoviesRepository(movieDao, movieNetworkDataSource,
-                        executors, onResponseListener);
+                        executors);
                 Timber.d("Made new repository");
             }
         }
@@ -112,6 +110,10 @@ public class PopularMoviesRepository {
                 mMovieNetworkDataSource.startFetchMoviesService();
             }
         });
+    }
+
+    public LiveData<NetworkState> getNetworkState() {
+        return mMovieNetworkDataSource.getNetworkState();
     }
 
     /**
