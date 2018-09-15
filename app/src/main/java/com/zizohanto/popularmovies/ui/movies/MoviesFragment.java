@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
 import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
@@ -69,10 +69,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mMoviesFragBinding = DataBindingUtil.inflate(inflater, R.layout.movies_frag, container, false);
         View root = mMoviesFragBinding.getRoot();
         mSwipeRefreshLayout =
-                (ScrollChildSwipeRefreshLayout) root.findViewById(R.id.refresh_layout);
+                root.findViewById(R.id.refresh_layout);
 
         // Set up movies view
-        mRecyclerView = (RecyclerView) mMoviesFragBinding.rvMovies;
+        mRecyclerView = mMoviesFragBinding.rvMovies;
 
         GridLayoutManager layoutManager = new GridLayoutManager(mContext, 2);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -94,6 +94,89 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         setScrollListener(layoutManager);
 
         return root;
+    }
+
+    private void setupSharedPreferences() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mMoviesSortType = sharedPreferences.getString(getString(R.string.pref_key_sort_by),
+                getString(R.string.pref_sort_by_popularity_value));
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setupViewModel() {
+        MoviesFragViewModelFactory factory =
+                InjectorUtils.provideMFViewModelFactory(mContext,
+                        mMoviesSortType, true, mPageToLoad);
+        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
+
+        observeMovies();
+
+        observeNetworkState();
+    }
+
+    private void observeMovies() {
+        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (movies != null && movies.size() != 0) {
+                    mMovieAdapter.setMovieData(movies);
+                }
+                isLoading = false;
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private void observeNetworkState() {
+        mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(@Nullable NetworkState networkState) {
+
+                setLoadingIndicator(false);
+
+                if (networkState != null && networkState.getStatus() == NetworkState.Status.RUNNING) {
+                    isLoading = true;
+                    setLoadingIndicator(true);
+                } else {
+                    isLoading = false;
+                    setLoadingIndicator(false);
+                }
+
+                if (networkState != null && networkState.getStatus() == NetworkState.Status.FAILED) {
+                    isLoading = false;
+                    setLoadingIndicator(false);
+                    Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
+                    //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    public void setLoadingIndicator(final boolean active) {
+        // setRefreshing() is called after the toolbar is done with everything else.
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(active);
+            }
+        });
+    }
+
+    private void setProgressIndicator() {
+        mSwipeRefreshLayout.setColorSchemeColors(
+                ContextCompat.getColor(mContext, R.color.colorPrimary),
+                ContextCompat.getColor(mContext, R.color.colorAccent),
+                ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
+        );
+        // Set the scrolling view in the custom SwipeRefreshLayout.
+        mSwipeRefreshLayout.setScrollUpChild(mRecyclerView);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchFirstMovies();
+            }
+        });
     }
 
     private void setScrollListener(GridLayoutManager layoutManager) {
@@ -137,54 +220,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 firstVisibleItemPosition >= 0;
     }
 
-    private void setupSharedPreferences() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mMoviesSortType = sharedPreferences.getString(getString(R.string.pref_key_sort_by),
-                getString(R.string.pref_sort_by_popularity_value));
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    private void setupViewModel() {
-        MoviesFragViewModelFactory factory =
-                InjectorUtils.provideMFViewModelFactory(mContext,
-                        mMoviesSortType, true, mPageToLoad);
-        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
-
-        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (movies != null && movies.size() != 0) {
-                    mMovieAdapter.setMovieData(movies);
-                }
-                isLoading = false;
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
-
-        mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
-            @Override
-            public void onChanged(@Nullable NetworkState networkState) {
-
-                setLoadingIndicator(false);
-
-                if (networkState != null && networkState.getStatus() == NetworkState.Status.RUNNING) {
-                    isLoading = true;
-                    setLoadingIndicator(true);
-                } else {
-                    isLoading = false;
-                    setLoadingIndicator(false);
-                }
-
-                if (networkState != null && networkState.getStatus() == NetworkState.Status.FAILED) {
-                    isLoading = false;
-                    setLoadingIndicator(false);
-                    Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
-                    //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
     private void showSortingPopUpMenu() {
         PopupMenu popup = new PopupMenu(mContext, Objects.requireNonNull(getActivity()).findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
@@ -216,33 +251,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         popup.show();
     }
 
-    private void setProgressIndicator() {
-        mSwipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(mContext, R.color.colorPrimary),
-                ContextCompat.getColor(mContext, R.color.colorAccent),
-                ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
-        );
-        // Set the scrolling view in the custom SwipeRefreshLayout.
-        mSwipeRefreshLayout.setScrollUpChild(mRecyclerView);
-
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                fetchFirstMovies();
-            }
-        });
-    }
-
-    public void setLoadingIndicator(final boolean active) {
-        // setRefreshing() is called after the toolbar is done with everything else.
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(active);
-            }
-        });
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -262,9 +270,12 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     @Override
-    public void onMovieClick(String title) {
+    public void onMovieClick(Movie movie) {
         Intent movieDetailIntent = new Intent(getActivity(), DetailsActivity.class);
+        String title = movie.getTitle();
+        Integer id = movie.getId();
         movieDetailIntent.putExtra(DetailsActivity.MOVIE_TITLE_EXTRA, title);
+        movieDetailIntent.putExtra(DetailsActivity.MOVIE_ID_EXTRA, id);
         startActivity(movieDetailIntent);
     }
 

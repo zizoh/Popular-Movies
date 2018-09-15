@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.movie.Movie;
 
 import java.util.List;
 
@@ -91,10 +91,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    Movie newWeather = newMovies.get(newItemPosition);
-                    Movie oldWeather = newMovies.get(oldItemPosition);
-                    return newWeather.getId() == oldWeather.getId()
-                            && newWeather.getTitle().equals(oldWeather.getTitle());
+                    Movie newMovie = newMovies.get(newItemPosition);
+                    Movie oldMovie = newMovies.get(oldItemPosition);
+                    return newMovie.getId() == oldMovie.getId()
+                            && newMovie.getTitle().equals(oldMovie.getTitle());
                 }
             });
             mMovies = newMovies;
@@ -104,7 +104,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public interface MovieItemClickListener {
-        void onMovieClick(String clickedMovieTitle);
+        void onMovieClick(Movie clickedMovie);
     }
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -114,16 +114,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         private MovieAdapterViewHolder(View itemView) {
             super(itemView);
 
-            mMoviePoster = (ImageView) itemView.findViewById(R.id.iv_backdrop_image);
-            mMovieTitle = (TextView) itemView.findViewById(R.id.tv_movie_title);
+            mMoviePoster = itemView.findViewById(R.id.iv_backdrop_image);
+            mMovieTitle = itemView.findViewById(R.id.tv_movie_title);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            String movieTitle = mMovies.get(clickedPosition).getTitle();
-            mOnClickListener.onMovieClick(movieTitle);
+            Movie movie = mMovies.get(clickedPosition);
+            mOnClickListener.onMovieClick(movie);
         }
 
         void bind(Movie movie) {

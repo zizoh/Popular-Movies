@@ -27,9 +27,12 @@
                 android:value=".ui.movies.MoviesActivity" />
         </activity>
 
-        <!-- This is required for immediate syncs -->
+        <!-- Required for immediate syncs -->
         <service
-            android:name=".data.network.PopularMoviesSyncIntentService"
+            android:name=".data.network.PMMoviesSyncIntentService"
+            android:exported="false" />
+        <service
+            android:name=".data.network.PMVideosSyncIntentService"
             android:exported="false" />
     </application>
 

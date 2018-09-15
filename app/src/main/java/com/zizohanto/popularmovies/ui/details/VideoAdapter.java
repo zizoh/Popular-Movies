@@ -1,0 +1,128 @@
+package com.zizohanto.popularmovies.ui.details;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
+import com.zizohanto.popularmovies.R;
+import com.zizohanto.popularmovies.data.database.video.Video;
+
+import java.util.List;
+
+public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapterViewHolder> {
+    private static final String YOUTUBE_THUMBNAIL = "https://img.youtube.com/vi/%s/mqdefault.jpg";
+    private static final String VIDEO_TYPE_TRAILER = "Trailer";
+    private List<Video> mVideos;
+    private Context mContext;
+
+    VideoAdapter(Context context) {
+        mContext = context;
+    }
+
+    private static String buildCompleteThumbnailUrl(String videoKey) {
+        return String.format(YOUTUBE_THUMBNAIL, videoKey);
+    }
+
+    @NonNull
+    @Override
+    public VideoAdapter.VideoAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                                  int viewType) {
+        Context context = parent.getContext();
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.videos_list_item, parent, false);
+
+        return new VideoAdapterViewHolder(view);
+
+    }
+
+    @Override
+    public int getItemCount() {
+        if (null == mVideos) {
+            return 0;
+        } else {
+            return getNumberOfTrailers(mVideos);
+        }
+    }
+
+    private int getNumberOfTrailers(List<Video> videos) {
+        int count = 0;
+        for (int i = 0; i < videos.size(); i++) {
+            Video video = videos.get(i);
+            if (isVideoTrailer(video)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private boolean isVideoTrailer(Video video) {
+        String videoType = video.getType();
+        return videoType.equals(VIDEO_TYPE_TRAILER);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VideoAdapter.VideoAdapterViewHolder holder, int position) {
+        Video video = mVideos.get(position);
+        holder.bind(video);
+    }
+
+    public void setVideoData(List<Video> newVideos) {
+        // If there was no video data, then recreate all of the list
+        if (mVideos == null) {
+            mVideos = newVideos;
+        } else {
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return mVideos.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newVideos.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return mVideos.get(oldItemPosition).getId() ==
+                            newVideos.get(newItemPosition).getId();
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    Video newVideo = newVideos.get(newItemPosition);
+                    Video oldVideo = newVideos.get(oldItemPosition);
+                    return newVideo.getId() == oldVideo.getId()
+                            && newVideo.getKey().equals(oldVideo.getKey());
+                }
+            });
+            mVideos = newVideos;
+            result.dispatchUpdatesTo(this);
+        }
+        notifyDataSetChanged();
+    }
+
+    class VideoAdapterViewHolder extends RecyclerView.ViewHolder {
+        private ImageView mVideoThumbnail;
+
+        private VideoAdapterViewHolder(View itemView) {
+            super(itemView);
+
+            mVideoThumbnail = itemView.findViewById(R.id.iv_video_thumbnail);
+        }
+
+        void bind(Video video) {
+            Picasso.with(mContext)
+                    .load(buildCompleteThumbnailUrl(video.getKey()))
+                    .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
+                    .into(mVideoThumbnail);
+
+        }
+    }
+}

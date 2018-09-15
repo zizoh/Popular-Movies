@@ -1,4 +1,4 @@
-package com.zizohanto.popularmovies.data.database;
+package com.zizohanto.popularmovies.data.database.movie;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;

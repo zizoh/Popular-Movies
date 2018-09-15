@@ -1,4 +1,4 @@
-package com.zizohanto.popularmovies.data.database;
+package com.zizohanto.popularmovies.data.database.movie;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
@@ -12,7 +12,7 @@ import java.util.List;
 public interface MovieDao {
     // Returns a list of all movies in the database
     @Query("SELECT * FROM movie")
-    LiveData<List<Movie>> getAll();
+    LiveData<List<Movie>> getAllMovies();
 
     /**
      * @param title The title you want movie for
@@ -27,5 +27,5 @@ public interface MovieDao {
 
     // Deletes all movies from the database
     @Query("DELETE FROM movie")
-    void deleteAll();
+    void deleteAllMovies();
 }

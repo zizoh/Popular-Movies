@@ -5,8 +5,10 @@ import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
 
 import com.zizohanto.popularmovies.AppExecutors;
-import com.zizohanto.popularmovies.data.database.Movie;
-import com.zizohanto.popularmovies.data.database.MovieDao;
+import com.zizohanto.popularmovies.data.database.movie.Movie;
+import com.zizohanto.popularmovies.data.database.movie.MovieDao;
+import com.zizohanto.popularmovies.data.database.video.Video;
+import com.zizohanto.popularmovies.data.database.video.VideoDao;
 import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
@@ -24,6 +26,7 @@ public class PopularMoviesRepository {
     private static final Object LOCK = new Object();
     private static PopularMoviesRepository sInstance;
     private final MovieDao mMovieDao;
+    private final VideoDao mVideoDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
 
@@ -33,15 +36,17 @@ public class PopularMoviesRepository {
     private boolean mIsNotPreferenceChange;
 
     private PopularMoviesRepository(MovieDao movieDao,
+                                    VideoDao videoDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
                                     AppExecutors executors) {
         mMovieDao = movieDao;
+        mVideoDao = videoDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
-        LiveData<List<Movie>> networkData = mMovieNetworkDataSource.getTodaysMoviesData();
+        LiveData<List<Movie>> networkData = mMovieNetworkDataSource.getMoviesData();
 
         networkData.observeForever(new Observer<List<Movie>>() {
             @Override
@@ -54,6 +59,7 @@ public class PopularMoviesRepository {
                             PopularMoviesRepository.this.deleteOldData();
                             Timber.d("Old movies deleted");
                         }
+                        mVideoDao.deleteAllVideos();
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Timber.d("New values inserted");
@@ -61,22 +67,33 @@ public class PopularMoviesRepository {
                 });
             }
         });
-    }
 
-    /**
-     * Deletes old movies data
-     */
-    private void deleteOldData() {
-        mMovieDao.deleteAll();
+        LiveData<List<Video>> networkVideoData = mMovieNetworkDataSource.getVideos();
+
+        networkVideoData.observeForever(new Observer<List<Video>>() {
+            @Override
+            public void onChanged(@Nullable List<Video> videos) {
+                mExecutors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mVideoDao.deleteAllVideos();
+                        Timber.d("Old videos deleted");
+                        // Insert our new movie data into PopularMovie's database
+                        mVideoDao.bulkInsert(videos);
+                        Timber.e("New video values inserted");
+                    }
+                });
+            }
+        });
     }
 
     public synchronized static PopularMoviesRepository getInstance(
-            MovieDao movieDao, MovieNetworkDataSource movieNetworkDataSource,
+            MovieDao movieDao, VideoDao videoDao, MovieNetworkDataSource movieNetworkDataSource,
             AppExecutors executors) {
         Timber.d("Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new PopularMoviesRepository(movieDao, movieNetworkDataSource,
+                sInstance = new PopularMoviesRepository(movieDao, videoDao, movieNetworkDataSource,
                         executors);
                 Timber.d("Made new repository");
             }
@@ -85,8 +102,14 @@ public class PopularMoviesRepository {
     }
 
     /**
-     * Creates periodic sync tasks and checks to see if an immediate sync is required. If an
-     * immediate sync is required, this method will take care of making sure that sync occurs.
+     * Deletes old movies data
+     */
+    private void deleteOldData() {
+        mMovieDao.deleteAllMovies();
+    }
+
+    /**
+     * Starts service that fetches data
      */
     private synchronized void initializeData() {
         // Only perform initialization once per app lifetime. If initialization has already been
@@ -103,11 +126,20 @@ public class PopularMoviesRepository {
     /**
      * Network related operation
      */
-    public void startFetchMoviesService() {
+    private void startFetchMoviesService() {
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
                 mMovieNetworkDataSource.startFetchMoviesService();
+            }
+        });
+    }
+
+    private void startFetchVideosService(Integer id) {
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mMovieNetworkDataSource.startFetchVideosService(id);
             }
         });
     }
@@ -122,7 +154,7 @@ public class PopularMoviesRepository {
     public LiveData<List<Movie>> getCurrentMovies() {
         Timber.d("Getting current movies: ");
         initializeData();
-        return mMovieDao.getAll();
+        return mMovieDao.getAllMovies();
     }
 
     public LiveData<Movie> getMovieByTitle(String title) {
@@ -130,9 +162,15 @@ public class PopularMoviesRepository {
         return mMovieDao.getMovieByTitle(title);
     }
 
+    public LiveData<List<Video>> getVideosOfMovieId(Integer id) {
+        startFetchVideosService(id);
+        return mVideoDao.getAllVideos();
+    }
+
     public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
     }
+
 }

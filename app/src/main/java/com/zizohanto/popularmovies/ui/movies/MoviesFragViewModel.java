@@ -4,7 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.zizohanto.popularmovies.data.PopularMoviesRepository;
-import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
 import java.util.List;

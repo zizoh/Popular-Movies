@@ -5,6 +5,7 @@
     <string name="nav_most_popular">Most Popular</string>
     <string name="nav_highest_rated">Top Rated</string>
     <string name="movie_poster">Movie poster</string>
+    <string name="video_thumbnail">Video thumbnail</string>
     <string name="tv_title">The Meg</string>
     <string name="tv_vote_average">6.6</string>
     <string name="tv_release_date">Released: 2018</string>

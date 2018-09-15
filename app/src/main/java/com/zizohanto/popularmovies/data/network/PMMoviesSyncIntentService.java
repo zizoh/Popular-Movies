@@ -8,14 +8,14 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import timber.log.Timber;
 
-public class PopularMoviesSyncIntentService extends IntentService {
+public class PMMoviesSyncIntentService extends IntentService {
     public static final String CURRENT_SORTING_KEY = "CURRENT_SORTING_KEY";
     public static final String PAGE_TO_LOAD_KEY = "PAGE_TO_LOAD_KEY";
     private String mMoviesSortType;
     private int mPageToLoad;
 
-    public PopularMoviesSyncIntentService() {
-        super("PopularMoviesSyncIntentService");
+    public PMMoviesSyncIntentService() {
+        super("PMMoviesSyncIntentService");
     }
 
     @Override

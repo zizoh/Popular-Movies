@@ -10,21 +10,29 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.database.Movie;
+import com.zizohanto.popularmovies.data.database.movie.Movie;
+import com.zizohanto.popularmovies.data.database.video.Video;
 import com.zizohanto.popularmovies.databinding.DetailsFragBinding;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 
+import java.util.List;
+
 public class DetailsFragment extends Fragment {
     public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
+    public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
 
     private DetailsFragBinding mDetailsFragBinding;
     private DetailsFragViewModel mViewModel;
+    private VideoAdapter mVideoAdapter;
+    private RecyclerView mRecyclerView;
     private Context mContext;
 
     public DetailsFragment() {
@@ -45,15 +53,9 @@ public class DetailsFragment extends Fragment {
 
         final String baseUrl = "http://image.tmdb.org/t/p/";
 
-        final String backdropImageSize = "w500/";
+        final String backdropImageSize = "w185/";
 
         return String.format("%s%s%s", baseUrl, backdropImageSize, filePath);
-    }
-
-    private void setupViewModel(String title) {
-        DetailsFragViewModelFactory factory = InjectorUtils.
-                provideDFViewModelFactory(mContext, title);
-        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 
     @Override
@@ -65,12 +67,40 @@ public class DetailsFragment extends Fragment {
         View root = mDetailsFragBinding.getRoot();
         mContext = getActivity();
         String title = null;
+        Integer id = 0;
         if (null != getArguments()) {
             title = getArguments().getString(MOVIE_TITLE_EXTRA);
+            id = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
-        setupViewModel(title);
+        // Set up videos view
+        mRecyclerView = mDetailsFragBinding.rvVideos;
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mVideoAdapter = new VideoAdapter(mContext);
+
+        mRecyclerView.setAdapter(mVideoAdapter);
+
+        setupViewModel(title, id);
+
+        observeMovies();
+
+        observeVideos();
+
+        return root;
+    }
+
+    private void setupViewModel(String title, Integer id) {
+        DetailsFragViewModelFactory factory = InjectorUtils.
+                provideDFViewModelFactory(mContext, title, id);
+        mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
+    }
+
+    private void observeMovies() {
         mViewModel.getMovie().observe(this, new Observer<Movie>() {
             @Override
             public void onChanged(@Nullable Movie movie) {
@@ -108,7 +138,16 @@ public class DetailsFragment extends Fragment {
                 }
             }
         });
+    }
 
-        return root;
+    private void observeVideos() {
+        mViewModel.getVideos().observe(this, new Observer<List<Video>>() {
+            @Override
+            public void onChanged(@Nullable List<Video> videos) {
+                if (videos != null && videos.size() != 0) {
+                    mVideoAdapter.setVideoData(videos);
+                }
+            }
+        });
     }
 }

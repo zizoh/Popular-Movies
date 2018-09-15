@@ -19,7 +19,8 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         MovieNetworkDataSource networkDataSource =
                 MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
-        return PopularMoviesRepository.getInstance(database.movieDao(), networkDataSource, executors);
+        return PopularMoviesRepository.getInstance(database.movieDao(), database.videoDao(),
+                networkDataSource, executors);
     }
 
     public static MovieNetworkDataSource provideNetworkDataSource(Context context) {
@@ -28,9 +29,10 @@ public class InjectorUtils {
         return MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
     }
 
-    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, String title) {
+    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, String title,
+                                                                        Integer id) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new DetailsFragViewModelFactory(repository, title);
+        return new DetailsFragViewModelFactory(repository, title, id);
     }
 
     public static MoviesFragViewModelFactory provideMFViewModelFactory(Context context,
