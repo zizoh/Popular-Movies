@@ -19,7 +19,7 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         MovieNetworkDataSource networkDataSource =
                 MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
-        return PopularMoviesRepository.getInstance(database.movieDao(), database.videoDao(),
+        return PopularMoviesRepository.getInstance(database.movieDao(), database.videoDao(), database.reviewDao(),
                 networkDataSource, executors);
     }
 

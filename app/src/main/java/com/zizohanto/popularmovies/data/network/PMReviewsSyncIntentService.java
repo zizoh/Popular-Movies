@@ -8,23 +8,22 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import timber.log.Timber;
 
-public class PMVideosSyncIntentService extends IntentService {
-
+public class PMReviewsSyncIntentService extends IntentService {
     private static final String MOVIE_ID_KEY = "MOVIE_ID_KEY";
     private Integer mId;
 
-    public PMVideosSyncIntentService() {
-        super("PMVideosSyncIntentService");
+    public PMReviewsSyncIntentService() {
+        super("PMReviewsSyncIntentService");
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Timber.d("Videos Intent service started");
+        Timber.d("Reviews Intent service started");
         if (null != intent) {
             mId = intent.getIntExtra(MOVIE_ID_KEY, 0);
         }
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
-        networkDataSource.fetchVideos(mId);
+        networkDataSource.fetchReviews(mId);
     }
 }

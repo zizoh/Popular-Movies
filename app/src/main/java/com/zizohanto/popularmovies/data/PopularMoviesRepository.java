@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.movie.MovieDao;
+import com.zizohanto.popularmovies.data.database.review.Review;
+import com.zizohanto.popularmovies.data.database.review.ReviewDao;
 import com.zizohanto.popularmovies.data.database.video.Video;
 import com.zizohanto.popularmovies.data.database.video.VideoDao;
 import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
@@ -27,6 +29,7 @@ public class PopularMoviesRepository {
     private static PopularMoviesRepository sInstance;
     private final MovieDao mMovieDao;
     private final VideoDao mVideoDao;
+    private final ReviewDao mReviewDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
 
@@ -37,10 +40,12 @@ public class PopularMoviesRepository {
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     VideoDao videoDao,
+                                    ReviewDao reviewDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
                                     AppExecutors executors) {
         mMovieDao = movieDao;
         mVideoDao = videoDao;
+        mReviewDao = reviewDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
 
@@ -56,10 +61,9 @@ public class PopularMoviesRepository {
                     public void run() {
                         if (mPageToLoad <= 1) {
                             // Deletes old historical data
-                            PopularMoviesRepository.this.deleteOldData();
+                            deleteOldMovieData();
                             Timber.d("Old movies deleted");
                         }
-                        mVideoDao.deleteAllVideos();
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Timber.d("New values inserted");
@@ -76,11 +80,33 @@ public class PopularMoviesRepository {
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        mVideoDao.deleteAllVideos();
+                        // Deletes old historical data
+                        deleteOldVideoData();
                         Timber.d("Old videos deleted");
+
                         // Insert our new movie data into PopularMovie's database
                         mVideoDao.bulkInsert(videos);
-                        Timber.e("New video values inserted");
+                        Timber.d("New video values inserted");
+                    }
+                });
+            }
+        });
+
+        LiveData<List<Review>> networkReviewData = mMovieNetworkDataSource.getReviews();
+
+        networkReviewData.observeForever(new Observer<List<Review>>() {
+            @Override
+            public void onChanged(@Nullable List<Review> reviews) {
+                mExecutors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Deletes old historical data
+                        deleteOldReviewData();
+                        Timber.d("Old reviews deleted");
+
+                        // Insert our new movie data into PopularMovie's database
+                        mReviewDao.bulkInsert(reviews);
+                        Timber.d("New review values inserted");
                     }
                 });
             }
@@ -88,12 +114,15 @@ public class PopularMoviesRepository {
     }
 
     public synchronized static PopularMoviesRepository getInstance(
-            MovieDao movieDao, VideoDao videoDao, MovieNetworkDataSource movieNetworkDataSource,
+            MovieDao movieDao,
+            VideoDao videoDao,
+            ReviewDao reviewDao,
+            MovieNetworkDataSource movieNetworkDataSource,
             AppExecutors executors) {
         Timber.d("Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new PopularMoviesRepository(movieDao, videoDao, movieNetworkDataSource,
+                sInstance = new PopularMoviesRepository(movieDao, videoDao, reviewDao, movieNetworkDataSource,
                         executors);
                 Timber.d("Made new repository");
             }
@@ -104,8 +133,22 @@ public class PopularMoviesRepository {
     /**
      * Deletes old movies data
      */
-    private void deleteOldData() {
+    private void deleteOldMovieData() {
         mMovieDao.deleteAllMovies();
+    }
+
+    /**
+     * Deletes old videos data
+     */
+    private void deleteOldVideoData() {
+        mVideoDao.deleteAllVideos();
+    }
+
+    /**
+     * Deletes old reviews data
+     */
+    private void deleteOldReviewData() {
+        mReviewDao.deleteAllReviews();
     }
 
     /**
@@ -144,6 +187,16 @@ public class PopularMoviesRepository {
         });
     }
 
+    private void startFetchReviewsService(Integer id) {
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mMovieNetworkDataSource.startFetchReviewsService(id);
+            }
+        });
+    }
+
+
     public LiveData<NetworkState> getNetworkState() {
         return mMovieNetworkDataSource.getNetworkState();
     }
@@ -164,7 +217,14 @@ public class PopularMoviesRepository {
 
     public LiveData<List<Video>> getVideosOfMovieId(Integer id) {
         startFetchVideosService(id);
+        // TODO: make video objects contain their movie id
         return mVideoDao.getAllVideos();
+    }
+
+    public LiveData<List<Review>> getReviewsOfMovieId(Integer id) {
+        startFetchReviewsService(id);
+        // TODO: make review objects contain their movie id
+        return mReviewDao.getAllReviews();
     }
 
     public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {

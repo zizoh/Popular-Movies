@@ -20,7 +20,7 @@ public class PMMoviesSyncIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Timber.d("Intent service started");
+        Timber.d("Movies Intent service started");
         if (null != intent) {
             mMoviesSortType = intent.getStringExtra(CURRENT_SORTING_KEY);
             mPageToLoad = intent.getIntExtra(PAGE_TO_LOAD_KEY, 1);

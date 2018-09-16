@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
+import com.zizohanto.popularmovies.data.database.review.Review;
 import com.zizohanto.popularmovies.data.database.video.Video;
 import com.zizohanto.popularmovies.databinding.DetailsFragBinding;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
@@ -32,7 +33,9 @@ public class DetailsFragment extends Fragment {
     private DetailsFragBinding mDetailsFragBinding;
     private DetailsFragViewModel mViewModel;
     private VideoAdapter mVideoAdapter;
-    private RecyclerView mRecyclerView;
+    private ReviewAdapter mReviewAdapter;
+    private RecyclerView mRecyclerViewVideos;
+    private RecyclerView mRecyclerViewReviews;
     private Context mContext;
 
     public DetailsFragment() {
@@ -73,17 +76,9 @@ public class DetailsFragment extends Fragment {
             id = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
-        // Set up videos view
-        mRecyclerView = mDetailsFragBinding.rvVideos;
+        setUpVideosView();
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
-        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-
-        mRecyclerView.setLayoutManager(layoutManager);
-
-        mVideoAdapter = new VideoAdapter(mContext);
-
-        mRecyclerView.setAdapter(mVideoAdapter);
+        setUpReviewsView();
 
         setupViewModel(title, id);
 
@@ -91,7 +86,35 @@ public class DetailsFragment extends Fragment {
 
         observeVideos();
 
+        observeReviews();
+
         return root;
+    }
+
+    private void setUpVideosView() {
+        mRecyclerViewVideos = mDetailsFragBinding.rvVideos;
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+        mRecyclerViewVideos.setLayoutManager(layoutManager);
+
+        mVideoAdapter = new VideoAdapter(mContext);
+
+        mRecyclerViewVideos.setAdapter(mVideoAdapter);
+    }
+
+    private void setUpReviewsView() {
+        mRecyclerViewReviews = mDetailsFragBinding.rvReviews;
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        mRecyclerViewReviews.setLayoutManager(layoutManager);
+
+        mReviewAdapter = new ReviewAdapter(mContext);
+
+        mRecyclerViewReviews.setAdapter(mReviewAdapter);
     }
 
     private void setupViewModel(String title, Integer id) {
@@ -146,6 +169,17 @@ public class DetailsFragment extends Fragment {
             public void onChanged(@Nullable List<Video> videos) {
                 if (videos != null && videos.size() != 0) {
                     mVideoAdapter.setVideoData(videos);
+                }
+            }
+        });
+    }
+
+    private void observeReviews() {
+        mViewModel.getReviews().observe(this, new Observer<List<Review>>() {
+            @Override
+            public void onChanged(@Nullable List<Review> reviews) {
+                if (reviews != null && reviews.size() != 0) {
+                    mReviewAdapter.setReviewData(reviews);
                 }
             }
         });

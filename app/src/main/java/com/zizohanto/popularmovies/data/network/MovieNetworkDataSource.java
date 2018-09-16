@@ -10,6 +10,8 @@ import com.zizohanto.popularmovies.AppExecutors;
 import com.zizohanto.popularmovies.BuildConfig;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.movie.MovieResponse;
+import com.zizohanto.popularmovies.data.database.review.Review;
+import com.zizohanto.popularmovies.data.database.review.ReviewResponse;
 import com.zizohanto.popularmovies.data.database.video.Video;
 import com.zizohanto.popularmovies.data.database.video.VideoResponse;
 import com.zizohanto.popularmovies.utils.NetworkState;
@@ -45,6 +47,9 @@ public class MovieNetworkDataSource {
     // LiveData storing the movies' videos data
     private final MutableLiveData<List<Video>> mDownloadedVideos;
 
+    // LiveData storing the movies' reviews data
+    private final MutableLiveData<List<Review>> mDownloadedReviews;
+
     private final MutableLiveData<NetworkState> networkState;
 
     private MovieNetworkDataSource(@NonNull Context context, AppExecutors executors) {
@@ -53,6 +58,7 @@ public class MovieNetworkDataSource {
         mDownloadedMovies = new MutableLiveData<>();
         networkState = new MutableLiveData<>();
         mDownloadedVideos = new MutableLiveData<>();
+        mDownloadedReviews = new MutableLiveData<>();
     }
 
     /**
@@ -69,12 +75,16 @@ public class MovieNetworkDataSource {
         return sInstance;
     }
 
+    public LiveData<List<Movie>> getMoviesData() {
+        return mDownloadedMovies;
+    }
+
     public LiveData<List<Video>> getVideos() {
         return mDownloadedVideos;
     }
 
-    public LiveData<List<Movie>> getMoviesData() {
-        return mDownloadedMovies;
+    public LiveData<List<Review>> getReviews() {
+        return mDownloadedReviews;
     }
 
     public MutableLiveData<NetworkState> getNetworkState() {
@@ -102,6 +112,16 @@ public class MovieNetworkDataSource {
         Timber.d("Videos Service created");
     }
 
+    /**
+     * Starts an intent service to fetch the reviews.
+     */
+    public void startFetchReviewsService(Integer id) {
+        Intent intentToFetch = new Intent(mContext, PMReviewsSyncIntentService.class);
+        intentToFetch.putExtra(MOVIE_ID_KEY, id);
+        mContext.startService(intentToFetch);
+        Timber.d("Reviews Service created");
+    }
+
     public void setFetchCriteria(String moviesSortType, int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mPageToLoad = pageToLoad;
@@ -127,8 +147,10 @@ public class MovieNetworkDataSource {
                         Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
                             List<Movie> movies = response.body().getMovies();
-                            Timber.d("Number of movies received: %s", movies.size());
-                            mDownloadedMovies.postValue(response.body().getMovies());
+                            if (movies != null) {
+                                Timber.d("Number of movies received: %s", movies.size());
+                            }
+                            mDownloadedMovies.postValue(movies);
                             networkState.postValue(NetworkState.LOADED);
                         } else {
                             Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
@@ -157,6 +179,10 @@ public class MovieNetworkDataSource {
         return call;
     }
 
+
+    /**
+     * Get videos
+     */
     public void fetchVideos(Integer id) {
         Timber.d("Fetch videos started");
         mExecutors.networkIO().execute(new Runnable() {
@@ -171,8 +197,12 @@ public class MovieNetworkDataSource {
                         Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
                             List<Video> videos = response.body().getVideos();
-                            Timber.d("Number of videos received: %s", videos.size());
-                            mDownloadedVideos.postValue(response.body().getVideos());
+                            if (videos == null) {
+                                Timber.d("Movie does not have videos");
+                            } else {
+                                Timber.d("Number of videos received: %s", videos.size());
+                            }
+                            mDownloadedVideos.postValue(videos);
                         } else {
                             Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
                         }
@@ -180,6 +210,44 @@ public class MovieNetworkDataSource {
 
                     @Override
                     public void onFailure(@NonNull Call<VideoResponse> call, @NonNull Throwable t) {
+                        Timber.e(t.toString());
+                    }
+                });
+            }
+        });
+    }
+
+
+    /**
+     * Get reviews
+     */
+    public void fetchReviews(Integer id) {
+        Timber.d("Fetch reviews started");
+        mExecutors.networkIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                ApiInterface apiService = ApiClient.getClient();
+
+                Call<ReviewResponse> call = apiService.getReviews(id, API_KEY);
+                call.enqueue(new Callback<ReviewResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ReviewResponse> call, @NonNull Response<ReviewResponse> response) {
+                        Timber.d("got a response %s", response);
+                        if (response.isSuccessful()) {
+                            List<Review> reviews = response.body().getReviews();
+                            if (reviews == null) {
+                                Timber.d("No review available for selected movie");
+                            } else {
+                                Timber.d("Number of reviews received: %s", reviews.size());
+                            }
+                            mDownloadedReviews.postValue(reviews);
+                        } else {
+                            Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ReviewResponse> call, @NonNull Throwable t) {
                         Timber.e(t.toString());
                     }
                 });
