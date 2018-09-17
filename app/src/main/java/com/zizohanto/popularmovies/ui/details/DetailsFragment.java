@@ -2,10 +2,13 @@ package com.zizohanto.popularmovies.ui.details;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.drawable.LayerDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,9 +29,10 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
 
-public class DetailsFragment extends Fragment {
+public class DetailsFragment extends Fragment implements VideoAdapter.VideoItemClickListener {
     public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
+    private static final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
     private DetailsFragBinding mDetailsFragBinding;
     private DetailsFragViewModel mViewModel;
@@ -99,7 +103,7 @@ public class DetailsFragment extends Fragment {
 
         mRecyclerViewVideos.setLayoutManager(layoutManager);
 
-        mVideoAdapter = new VideoAdapter(mContext);
+        mVideoAdapter = new VideoAdapter(mContext, this);
 
         mRecyclerViewVideos.setAdapter(mVideoAdapter);
     }
@@ -183,5 +187,21 @@ public class DetailsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onVideoClick(Video clickedVideo) {
+        String key = clickedVideo.getKey();
+        // https://www.youtube.com/watch?v=SUXWAEX2jlg
+        String youtubeVideoUrl = YOUTUBE_VIDEO_URL + key;
+
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse(youtubeVideoUrl));
+        try {
+            startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            startActivity(webIntent);
+        }
     }
 }

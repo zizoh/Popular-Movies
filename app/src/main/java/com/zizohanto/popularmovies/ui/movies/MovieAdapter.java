@@ -122,8 +122,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            Movie movie = mMovies.get(clickedPosition);
-            mOnClickListener.onMovieClick(movie);
+            mOnClickListener.onMovieClick(mMovies.get(clickedPosition));
         }
 
         void bind(Movie movie) {

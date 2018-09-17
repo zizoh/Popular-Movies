@@ -20,13 +20,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
     private static final String VIDEO_TYPE_TRAILER = "Trailer";
     private List<Video> mVideos;
     private Context mContext;
+    private VideoItemClickListener mVideoItemClickListener;
 
-    VideoAdapter(Context context) {
+    VideoAdapter(Context context, VideoItemClickListener videoItemClickListener) {
         mContext = context;
-    }
-
-    private static String buildCompleteThumbnailUrl(String videoKey) {
-        return String.format(YOUTUBE_THUMBNAIL, videoKey);
+        mVideoItemClickListener = videoItemClickListener;
     }
 
     @NonNull
@@ -108,21 +106,36 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
         notifyDataSetChanged();
     }
 
-    class VideoAdapterViewHolder extends RecyclerView.ViewHolder {
+    public interface VideoItemClickListener {
+        void onVideoClick(Video clickedVideo);
+    }
+
+    class VideoAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView mVideoThumbnail;
 
         private VideoAdapterViewHolder(View itemView) {
             super(itemView);
 
             mVideoThumbnail = itemView.findViewById(R.id.iv_video_thumbnail);
+            itemView.setOnClickListener(this);
         }
 
         void bind(Video video) {
             Picasso.with(mContext)
-                    .load(buildCompleteThumbnailUrl(video.getKey()))
+                    .load(buildVideoThumbnailUrl(video.getKey()))
                     .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
                     .into(mVideoThumbnail);
 
+        }
+
+        private String buildVideoThumbnailUrl(String videoKey) {
+            return String.format(YOUTUBE_THUMBNAIL, videoKey);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+            mVideoItemClickListener.onVideoClick(mVideos.get(clickedPosition));
         }
     }
 }
