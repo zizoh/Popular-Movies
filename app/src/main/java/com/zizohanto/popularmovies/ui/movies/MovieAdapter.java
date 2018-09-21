@@ -68,6 +68,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieData(List<Movie> newMovies) {
+        notifyDataSetChanged();
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
@@ -102,7 +103,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             mMovies = newMovies;
             result.dispatchUpdatesTo(this);
         }
-        notifyDataSetChanged();
     }
 
     public interface MovieItemClickListener {
