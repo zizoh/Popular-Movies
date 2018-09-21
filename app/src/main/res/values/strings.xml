@@ -4,6 +4,7 @@
     <string name="refresh">Refresh</string>
     <string name="nav_most_popular">Most Popular</string>
     <string name="nav_highest_rated">Top Rated</string>
+    <string name="nav_favourite">Favourite</string>
     <string name="movie_poster">Movie poster</string>
     <string name="video_thumbnail">Video thumbnail</string>
     <string name="tv_title">The Meg</string>

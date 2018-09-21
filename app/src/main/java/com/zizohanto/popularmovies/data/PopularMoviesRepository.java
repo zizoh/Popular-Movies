@@ -5,6 +5,8 @@ import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
 
 import com.zizohanto.popularmovies.AppExecutors;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovieDao;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.movie.MovieDao;
 import com.zizohanto.popularmovies.data.database.review.Review;
@@ -30,6 +32,7 @@ public class PopularMoviesRepository {
     private final MovieDao mMovieDao;
     private final VideoDao mVideoDao;
     private final ReviewDao mReviewDao;
+    private final FavouriteMovieDao mFavouriteMovieDao;
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
 
@@ -41,11 +44,13 @@ public class PopularMoviesRepository {
     private PopularMoviesRepository(MovieDao movieDao,
                                     VideoDao videoDao,
                                     ReviewDao reviewDao,
+                                    FavouriteMovieDao favouriteMovieDao,
                                     MovieNetworkDataSource movieNetworkDataSource,
                                     AppExecutors executors) {
         mMovieDao = movieDao;
         mVideoDao = videoDao;
         mReviewDao = reviewDao;
+        mFavouriteMovieDao = favouriteMovieDao;
         mMovieNetworkDataSource = movieNetworkDataSource;
         mExecutors = executors;
 
@@ -117,12 +122,14 @@ public class PopularMoviesRepository {
             MovieDao movieDao,
             VideoDao videoDao,
             ReviewDao reviewDao,
+            FavouriteMovieDao favouriteMovieDao,
             MovieNetworkDataSource movieNetworkDataSource,
             AppExecutors executors) {
         Timber.d("Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new PopularMoviesRepository(movieDao, videoDao, reviewDao, movieNetworkDataSource,
+                sInstance = new PopularMoviesRepository(movieDao, videoDao, reviewDao, favouriteMovieDao,
+                        movieNetworkDataSource,
                         executors);
                 Timber.d("Made new repository");
             }
@@ -196,13 +203,18 @@ public class PopularMoviesRepository {
         });
     }
 
+    public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
+        mMoviesSortType = moviesSortType;
+        mIsNotPreferenceChange = isNotPreferenceChange;
+        mPageToLoad = pageToLoad;
+    }
 
     public LiveData<NetworkState> getNetworkState() {
         return mMovieNetworkDataSource.getNetworkState();
     }
 
-    /**
-     * Database related operations
+    /*
+     * Movies database related operations
      */
     public LiveData<List<Movie>> getCurrentMovies() {
         Timber.d("Getting current movies: ");
@@ -215,22 +227,61 @@ public class PopularMoviesRepository {
         return mMovieDao.getMovieByTitle(title);
     }
 
+    public LiveData<List<Movie>> getMoviesByIds(int[] ids) {
+        return mMovieDao.getMoviesByIds(ids);
+    }
+
+    /*
+     *  Trailers database operations
+     */
     public LiveData<List<Video>> getVideosOfMovieId(Integer id) {
+        Timber.d("Getting videos for movie with id: %s", String.valueOf(id));
         startFetchVideosService(id);
         // TODO: make video objects contain their movie id
         return mVideoDao.getAllVideos();
     }
 
+    /*
+     *  Reviews database operations
+     */
     public LiveData<List<Review>> getReviewsOfMovieId(Integer id) {
+        Timber.d("Getting reviews for movie with id: %s", String.valueOf(id));
         startFetchReviewsService(id);
         // TODO: make review objects contain their movie id
         return mReviewDao.getAllReviews();
     }
 
-    public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
-        mMoviesSortType = moviesSortType;
-        mIsNotPreferenceChange = isNotPreferenceChange;
-        mPageToLoad = pageToLoad;
+    /*
+     *  Favourite movies database operations
+     */
+    public LiveData<List<FavouriteMovie>> getAllFavouriteMovies() {
+        Timber.d("Getting all favourite movies");
+        return mFavouriteMovieDao.getAllFavouriteMovies();
+    }
+
+    public LiveData<FavouriteMovie> getFavouriteMovieWithTitle(String title) {
+        Timber.d("Getting favourite movie with title: %s", title);
+        return mFavouriteMovieDao.getFavouriteMovieWithTitle(title);
+    }
+
+    public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {
+        Timber.d("Inserting favourite movie");
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mFavouriteMovieDao.insertFavouriteMovie(favouriteMovie);
+            }
+        });
+    }
+
+    public void deleteFavouriteMovieWithTitle(String title) {
+        Timber.d("Deleting favourite movie with title: %s", title);
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mFavouriteMovieDao.deleteFavouriteMovie(title);
+            }
+        });
     }
 
 }

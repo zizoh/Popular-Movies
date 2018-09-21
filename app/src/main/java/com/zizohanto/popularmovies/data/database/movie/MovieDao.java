@@ -16,10 +16,18 @@ public interface MovieDao {
 
     /**
      * @param title The title you want movie for
-     * @return {@link LiveData} with movie with title specified
+     * @return {@link LiveData} of movie with title specified
      */
     @Query("SELECT * FROM movie WHERE title = :title")
     LiveData<Movie> getMovieByTitle(String title);
+
+    /**
+     * @param ids The ids you want movies for
+     * @return {@link LiveData} of movies with ids specified
+     */
+    @Query("SELECT * FROM movie WHERE id IN(:ids)")
+    LiveData<List<Movie>> getMoviesByIds(int[] ids);
+
 
     // Inserts multiple movies
     @Insert(onConflict = OnConflictStrategy.REPLACE)

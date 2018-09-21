@@ -18,9 +18,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import com.squareup.picasso.Picasso;
 import com.zizohanto.popularmovies.R;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.review.Review;
 import com.zizohanto.popularmovies.data.database.video.Video;
@@ -29,10 +31,14 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
 
-public class DetailsFragment extends Fragment implements VideoAdapter.VideoItemClickListener {
+public class DetailsFragment extends Fragment implements View.OnClickListener,
+        VideoAdapter.VideoItemClickListener {
     public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
     private static final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
+
+    private String mTitle;
+    private Integer mId;
 
     private DetailsFragBinding mDetailsFragBinding;
     private DetailsFragViewModel mViewModel;
@@ -73,20 +79,23 @@ public class DetailsFragment extends Fragment implements VideoAdapter.VideoItemC
         mDetailsFragBinding = DataBindingUtil.inflate(inflater, R.layout.details_frag, container, false);
         View root = mDetailsFragBinding.getRoot();
         mContext = getActivity();
-        String title = null;
-        Integer id = 0;
+
         if (null != getArguments()) {
-            title = getArguments().getString(MOVIE_TITLE_EXTRA);
-            id = getArguments().getInt(MOVIE_ID_EXTRA, 0);
+            mTitle = getArguments().getString(MOVIE_TITLE_EXTRA);
+            mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
+
+        mDetailsFragBinding.cbFavourite.setOnClickListener(this);
 
         setUpVideosView();
 
         setUpReviewsView();
 
-        setupViewModel(title, id);
+        setupViewModel(mTitle, mId);
 
         observeMovies();
+
+        observeFavourite();
 
         observeVideos();
 
@@ -167,6 +176,17 @@ public class DetailsFragment extends Fragment implements VideoAdapter.VideoItemC
         });
     }
 
+    private void observeFavourite() {
+        mViewModel.getFavouriteMovie().observe(this, new Observer<FavouriteMovie>() {
+            @Override
+            public void onChanged(@Nullable FavouriteMovie favouriteMovie) {
+                if (favouriteMovie != null) {
+                    mDetailsFragBinding.cbFavourite.setChecked(true);
+                }
+            }
+        });
+    }
+
     private void observeVideos() {
         mViewModel.getVideos().observe(this, new Observer<List<Video>>() {
             @Override
@@ -203,5 +223,26 @@ public class DetailsFragment extends Fragment implements VideoAdapter.VideoItemC
         } catch (ActivityNotFoundException ex) {
             startActivity(webIntent);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        boolean checked = ((CheckBox) v).isChecked();
+        switch (v.getId()) {
+            case R.id.cb_favourite:
+                if (checked) {
+                    saveFavourite();
+                } else {
+                    deleteFavourite();
+                }
+        }
+    }
+
+    private void saveFavourite() {
+        mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId));
+    }
+
+    private void deleteFavourite() {
+        mViewModel.deleteFavouriteMovie();
     }
 }

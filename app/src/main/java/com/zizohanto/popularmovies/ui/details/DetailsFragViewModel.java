@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.zizohanto.popularmovies.data.PopularMoviesRepository;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.review.Review;
 import com.zizohanto.popularmovies.data.database.video.Video;
@@ -16,6 +17,7 @@ class DetailsFragViewModel extends ViewModel {
     private final LiveData<Movie> mMovie;
     private final LiveData<List<Video>> mVideos;
     private final LiveData<List<Review>> mRevies;
+    private final LiveData<FavouriteMovie> mFavouriteMovie;
     private final String mTitle;
     private final Integer mId;
 
@@ -27,6 +29,7 @@ class DetailsFragViewModel extends ViewModel {
         mMovie = mRepository.getMovieByTitle(mTitle);
         mVideos = mRepository.getVideosOfMovieId(mId);
         mRevies = mRepository.getReviewsOfMovieId(mId);
+        mFavouriteMovie = mRepository.getFavouriteMovieWithTitle(mTitle);
 
     }
 
@@ -41,4 +44,18 @@ class DetailsFragViewModel extends ViewModel {
     public LiveData<List<Review>> getReviews() {
         return mRevies;
     }
+
+    public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {
+        mRepository.saveFavouriteMovie(favouriteMovie);
+    }
+
+    public LiveData<FavouriteMovie> getFavouriteMovie() {
+        return mFavouriteMovie;
+    }
+
+    public void deleteFavouriteMovie() {
+        mRepository.deleteFavouriteMovieWithTitle(mTitle);
+    }
+
+
 }

@@ -6,6 +6,8 @@ import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovieDao;
 import com.zizohanto.popularmovies.data.database.movie.ListTypeConverter;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.data.database.movie.MovieDao;
@@ -16,7 +18,7 @@ import com.zizohanto.popularmovies.data.database.video.VideoDao;
 
 import timber.log.Timber;
 
-@Database(entities = {Movie.class, Video.class, Review.class}, version = 1)
+@Database(entities = {Movie.class, Video.class, Review.class, FavouriteMovie.class}, version = 1)
 @TypeConverters(ListTypeConverter.class)
 public abstract class PopularMovieDatabase extends RoomDatabase {
 
@@ -44,4 +46,6 @@ public abstract class PopularMovieDatabase extends RoomDatabase {
     public abstract VideoDao videoDao();
 
     public abstract ReviewDao reviewDao();
+
+    public abstract FavouriteMovieDao favouriteMovieDao();
 }

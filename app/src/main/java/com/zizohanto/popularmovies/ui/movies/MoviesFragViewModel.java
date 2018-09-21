@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.zizohanto.popularmovies.data.PopularMoviesRepository;
+import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
@@ -33,5 +34,13 @@ public class MoviesFragViewModel extends ViewModel {
 
     public LiveData<NetworkState> getNetworkState() {
         return mNetworkState;
+    }
+
+    public LiveData<List<FavouriteMovie>> getAllFavouriteMovies() {
+        return mRepository.getAllFavouriteMovies();
+    }
+
+    public LiveData<List<Movie>> getFavouriteMoviesByIds(int[] ids) {
+        return mRepository.getMoviesByIds(ids);
     }
 }
