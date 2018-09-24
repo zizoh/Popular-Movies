@@ -15,11 +15,11 @@ public interface MovieDao {
     LiveData<List<Movie>> getAllMovies();
 
     /**
-     * @param title The title you want movie for
-     * @return {@link LiveData} of movie with title specified
+     * @param id The id you want movie for
+     * @return {@link LiveData} of movie with id specified
      */
-    @Query("SELECT * FROM movie WHERE title = :title")
-    LiveData<Movie> getMovieByTitle(String title);
+    @Query("SELECT * FROM movie WHERE id = :id")
+    LiveData<Movie> getMovieById(Integer id);
 
     /**
      * @param ids The ids you want movies for

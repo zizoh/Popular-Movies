@@ -34,10 +34,9 @@ public class InjectorUtils {
         return MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
     }
 
-    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, String title,
-                                                                        Integer id) {
+    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, Integer id) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new DetailsFragViewModelFactory(repository, title, id);
+        return new DetailsFragViewModelFactory(repository, id);
     }
 
     public static MoviesFragViewModelFactory provideMFViewModelFactory(Context context,

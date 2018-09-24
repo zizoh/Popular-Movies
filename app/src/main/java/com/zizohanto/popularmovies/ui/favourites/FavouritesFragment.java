@@ -29,8 +29,6 @@ import java.util.List;
 
 public class FavouritesFragment extends Fragment implements MovieAdapter.MovieItemClickListener {
 
-    private boolean isLoading;
-
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private MovieAdapter mMovieAdapter;
@@ -139,7 +137,6 @@ public class FavouritesFragment extends Fragment implements MovieAdapter.MovieIt
     }
 
     private void loading(boolean loading) {
-        isLoading = loading;
         setLoadingIndicator(loading);
     }
 
@@ -155,7 +152,6 @@ public class FavouritesFragment extends Fragment implements MovieAdapter.MovieIt
     @Override
     public void onMovieClick(Movie movie) {
         Intent movieDetailIntent = new Intent(getActivity(), DetailsActivity.class);
-        movieDetailIntent.putExtra(DetailsActivity.MOVIE_TITLE_EXTRA, movie.getTitle());
         movieDetailIntent.putExtra(DetailsActivity.MOVIE_ID_EXTRA, movie.getId());
         startActivity(movieDetailIntent);
     }

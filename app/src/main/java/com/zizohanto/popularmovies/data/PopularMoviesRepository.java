@@ -222,9 +222,9 @@ public class PopularMoviesRepository {
         return mMovieDao.getAllMovies();
     }
 
-    public LiveData<Movie> getMovieByTitle(String title) {
+    public LiveData<Movie> getMovieById(Integer id) {
         initializeData();
-        return mMovieDao.getMovieByTitle(title);
+        return mMovieDao.getMovieById(id);
     }
 
     public LiveData<List<Movie>> getMoviesByIds(int[] ids) {
@@ -259,9 +259,9 @@ public class PopularMoviesRepository {
         return mFavouriteMovieDao.getAllFavouriteMovies();
     }
 
-    public LiveData<FavouriteMovie> getFavouriteMovieWithTitle(String title) {
-        Timber.d("Getting favourite movie with title: %s", title);
-        return mFavouriteMovieDao.getFavouriteMovieWithTitle(title);
+    public LiveData<FavouriteMovie> getFavouriteMovieWithId(Integer id) {
+        Timber.d("Getting favourite movie with id: %s", id);
+        return mFavouriteMovieDao.getFavouriteMovieWithId(id);
     }
 
     public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {
@@ -274,12 +274,12 @@ public class PopularMoviesRepository {
         });
     }
 
-    public void deleteFavouriteMovieWithTitle(String title) {
-        Timber.d("Deleting favourite movie with title: %s", title);
+    public void deleteFavouriteMovieWithId(Integer id) {
+        Timber.d("Deleting favourite movie with id: %s", id);
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                mFavouriteMovieDao.deleteFavouriteMovie(title);
+                mFavouriteMovieDao.deleteFavouriteMovie(id);
             }
         });
     }

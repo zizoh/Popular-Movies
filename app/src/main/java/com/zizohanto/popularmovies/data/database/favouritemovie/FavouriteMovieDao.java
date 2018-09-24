@@ -15,18 +15,18 @@ public interface FavouriteMovieDao {
     LiveData<List<FavouriteMovie>> getAllFavouriteMovies();
 
     /**
-     * @param title The title you want movie for
-     * @return {@link LiveData} of movie with title specified
+     * @param id The id you want movie for
+     * @return {@link LiveData} of movie with id specified
      */
-    @Query("SELECT * FROM favouritemovie WHERE title = :title")
-    LiveData<FavouriteMovie> getFavouriteMovieWithTitle(String title);
+    @Query("SELECT * FROM favouritemovie WHERE id = :id")
+    LiveData<FavouriteMovie> getFavouriteMovieWithId(Integer id);
 
     // Inserts favourite movie
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertFavouriteMovie(FavouriteMovie favouriteMovie);
 
-    // Deletes favorite movie with title from the database
-    @Query("DELETE FROM favouritemovie WHERE title = :title")
-    void deleteFavouriteMovie(String title);
+    // Deletes favorite movie with id from the database
+    @Query("DELETE FROM favouritemovie WHERE id = :id")
+    void deleteFavouriteMovie(Integer id);
 
 }

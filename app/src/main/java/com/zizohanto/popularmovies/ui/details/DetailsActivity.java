@@ -7,7 +7,6 @@ import com.zizohanto.popularmovies.R;
 import com.zizohanto.popularmovies.utils.ActivityUtils;
 
 public class DetailsActivity extends AppCompatActivity {
-    public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
 
     @Override
@@ -15,15 +14,13 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.details_act);
 
-        String title = getIntent().getStringExtra(MOVIE_TITLE_EXTRA);
         Integer id = getIntent().getIntExtra(MOVIE_ID_EXTRA, 0);
 
-        addFragmentToActivity(title, id);
+        addFragmentToActivity(id);
     }
 
-    private void addFragmentToActivity(String title, Integer id) {
+    private void addFragmentToActivity(Integer id) {
         Bundle bundle = new Bundle();
-        bundle.putString(MOVIE_TITLE_EXTRA, title);
         bundle.putInt(MOVIE_ID_EXTRA, id);
 
         DetailsFragment tasksFragment =

@@ -294,7 +294,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onMovieClick(Movie movie) {
         Intent movieDetailIntent = new Intent(getActivity(), DetailsActivity.class);
-        movieDetailIntent.putExtra(DetailsActivity.MOVIE_TITLE_EXTRA, movie.getTitle());
         movieDetailIntent.putExtra(DetailsActivity.MOVIE_ID_EXTRA, movie.getId());
         startActivity(movieDetailIntent);
     }
