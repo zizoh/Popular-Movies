@@ -22,7 +22,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     private Context mContext;
     private MovieItemClickListener mOnClickListener;
 
-    MovieAdapter(Context context, MovieItemClickListener listener) {
+    public MovieAdapter(Context context, MovieItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
     }

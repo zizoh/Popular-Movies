@@ -24,10 +24,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.zizohanto.popularmovies.R;
-import com.zizohanto.popularmovies.data.database.favouritemovie.FavouriteMovie;
 import com.zizohanto.popularmovies.data.database.movie.Movie;
 import com.zizohanto.popularmovies.databinding.MoviesFragBinding;
 import com.zizohanto.popularmovies.ui.details.DetailsActivity;
+import com.zizohanto.popularmovies.ui.favourites.FavouritesActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
@@ -37,13 +37,12 @@ import java.util.Objects;
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private int mPageToLoad = 1;
+    private boolean isLoading;
+    private String mMoviesSortType;
+
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
-    public static final String MOST_POPULAR_MOVIES = "movie/popular";
-    private String mMoviesSortType;
-    private boolean isLoading;
-    private boolean isFavouriteView;
-    private int mPageToLoad = 1;
     private MovieAdapter mMovieAdapter;
     private MoviesFragViewModel mViewModel;
     private RecyclerView mRecyclerView;
@@ -67,7 +66,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     public View onCreateView(@Nullable LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mMoviesFragBinding = DataBindingUtil.inflate(inflater, R.layout.movies_frag, container, false);
+        mMoviesFragBinding = DataBindingUtil.inflate(inflater, R.layout.movies_frag, container,
+                false);
         View root = mMoviesFragBinding.getRoot();
         mSwipeRefreshLayout =
                 root.findViewById(R.id.refresh_layout);
@@ -86,17 +86,17 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        setupViewModel();
-
-        observeMovies();
-
-        observeNetworkState();
-
         setProgressIndicator();
 
         setHasOptionsMenu(true);
 
         setScrollListener(layoutManager);
+
+        setupViewModel();
+
+        observeMovies();
+
+        observeNetworkState();
 
         return root;
     }
@@ -128,20 +128,15 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
             @Override
             public void onChanged(@Nullable NetworkState networkState) {
-
-                setLoadingIndicator(false);
-
                 if (networkState != null && networkState.getStatus() == NetworkState.Status.RUNNING) {
-                    isLoading = true;
-                    setLoadingIndicator(true);
+                    loading(true);
+
                 } else {
-                    isLoading = false;
-                    setLoadingIndicator(false);
+                    loading(false);
                 }
 
                 if (networkState != null && networkState.getStatus() == NetworkState.Status.FAILED) {
-                    isLoading = false;
-                    setLoadingIndicator(false);
+                    loading(false);
                     Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
                     //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
                 }
@@ -149,77 +144,15 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         });
     }
 
-    private void loadFavouriteMovies() {
-        mViewModel.getAllFavouriteMovies().observe(this, new Observer<List<FavouriteMovie>>() {
-            @Override
-            public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
-                if (favouriteMovies != null && favouriteMovies.size() != 0) {
-                    getMoviesFromFavourites(favouriteMovies);
-                }
-                isLoading = false;
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
-    }
-
-    private void getMoviesFromFavourites(List<FavouriteMovie> favouriteMovies) {
-        int[] ids = new int[favouriteMovies.size()];
-        for (int i = 0; i < favouriteMovies.size(); i++) {
-            ids[i] = favouriteMovies.get(i).getId();
-        }
-        mViewModel.getFavouriteMoviesByIds(ids).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                setMoviesToAdapter(movies);
-            }
-        });
-        /*String[] title = new String[favouriteMovies.size()];
-        for (int i = 0; i <favouriteMovies.size() ; i++) {
-            title[i] = favouriteMovies.get(i).getTitle();
-            mViewModel.getMovieByTitle(title[i]).observe(this, new Observer<Movie>() {
-                @Override
-                public void onChanged(@Nullable Movie movie) {
-
-                }
-            });
-        }*/
-        /*List<Movie> movies = new ArrayList<>();
-        for (int i = 0; i < favouriteMovies.size(); i++) {
-            FavouriteMovie favouriteMovie = favouriteMovies.get(i);
-            String title = favouriteMovie.getTitle();
-            *//*Movie movie = mViewModel.getMovieByTitle(title).getValue();
-            if (movie != null) {
-                movies.add(movie);
-            }*//*
-            mViewModel.getMovieByTitle(title).observe(this, new Observer<Movie>() {
-                @Override
-                public void onChanged(@Nullable Movie movie) {
-                    if (movie != null) {
-                        Timber.e("Title of favourite movie recieved: " + movie.getTitle());
-                        movies.add(movie);
-                    }
-                }
-            });
-        }
-*/
+    private void loading(boolean loading) {
+        isLoading = loading;
+        setLoadingIndicator(loading);
     }
 
     private void setMoviesToAdapter(@Nullable List<Movie> movies) {
         if (movies != null && movies.size() != 0) {
             mMovieAdapter.setMovieData(movies);
         }
-        isLoading = false;
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    public void setLoadingIndicator(final boolean active) {
-        // setRefreshing() is called after the toolbar is done with everything else.
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(active);
-            }
-        });
     }
 
     private void setProgressIndicator() {
@@ -254,37 +187,49 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                if (isMoreFetchNeeded(visibleItemCount, totalItemCount, firstVisibleItemPosition) && !isLoading && !isFavouriteView) {
+                boolean isMoreFetchNeeded = isMoreFetchNeeded(visibleItemCount, totalItemCount,
+                        firstVisibleItemPosition);
+
+                if (isMoreFetchNeeded && !isLoading) {
                     mPageToLoad++;
-                    isLoading = true;
                     fetchMoreMovies();
                 }
             }
         });
     }
 
+    public void setLoadingIndicator(final boolean active) {
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(active);
+            }
+        });
+    }
+
     private void fetchFirstMovies() {
-        isLoading = true;
+        loading(true);
         mPageToLoad = 1;
-        setLoadingIndicator(true);
         mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
     }
 
     private void fetchMoreMovies() {
-        setLoadingIndicator(true);
+        loading(true);
         mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
     }
 
-    private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {
-        return (visibleItemCount + firstVisibleItemPosition) >= totalItemCount &&
-                firstVisibleItemPosition >= 0;
+    private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount,
+                                      int firstVisibleItemPosition) {
+        return (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                && firstVisibleItemPosition >= 0;
     }
 
     private void showSortingPopUpMenu() {
-        PopupMenu popup = new PopupMenu(mContext, Objects.requireNonNull(getActivity()).findViewById(R.id.menu_filter));
+        PopupMenu popup = new PopupMenu(mContext,
+                Objects.requireNonNull(getActivity()).findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.sort_movies, popup.getMenu());
 
-        if (MOST_POPULAR_MOVIES.equals(mMoviesSortType)) {
+        if (getString(R.string.pref_sort_by_popularity_value).equals(mMoviesSortType)) {
             popup.getMenu().findItem(R.id.most_popular).setChecked(true);
         } else {
             popup.getMenu().findItem(R.id.top_rated).setChecked(true);
@@ -294,19 +239,13 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             public boolean onMenuItemClick(MenuItem item) {
                 SharedPreferences.Editor editor = mSharedPreference.edit();
                 switch (item.getItemId()) {
-                    case R.id.favourite:
-                        loadFavouriteMovies();
-                        isFavouriteView = true;
-                        break;
                     case R.id.top_rated:
                         editor.putString(getString(R.string.pref_key_sort_by),
                                 getString(R.string.pref_sort_by_top_rated_value));
-                        isFavouriteView = false;
                         break;
                     default:
                         editor.putString(getString(R.string.pref_key_sort_by),
                                 getString(R.string.pref_sort_by_popularity_value));
-                        isFavouriteView = false;
                         break;
                 }
                 editor.apply();
@@ -319,12 +258,11 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_key_sort_by)) && !isFavouriteView) {
+        if (key.equals(getString(R.string.pref_key_sort_by))) {
             mMoviesSortType = sharedPreferences.getString(key,
                     getString(R.string.pref_sort_by_popularity_value));
+            fetchFirstMovies();
         }
-        // TODO: uncomment call to fetchFirstMovies()
-        fetchFirstMovies();
     }
 
     @Override
@@ -336,8 +274,16 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             case R.id.menu_refresh:
                 fetchFirstMovies();
                 break;
+            case R.id.menu_favourite:
+                openFavouriteMoviesList();
+                break;
         }
         return true;
+    }
+
+    private void openFavouriteMoviesList() {
+        Intent favouritesActivityIntent = new Intent(getActivity(), FavouritesActivity.class);
+        startActivity(favouritesActivityIntent);
     }
 
     @Override

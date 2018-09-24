@@ -7,9 +7,5 @@
         <item
             android:id="@+id/top_rated"
             android:title="@string/nav_highest_rated" />
-
-        <item
-            android:id="@+id/favourite"
-            android:title="@string/nav_favourite" />
     </group>
 </menu>

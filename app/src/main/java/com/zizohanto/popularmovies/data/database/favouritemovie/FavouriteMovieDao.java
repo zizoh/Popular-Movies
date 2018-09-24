@@ -29,8 +29,4 @@ public interface FavouriteMovieDao {
     @Query("DELETE FROM favouritemovie WHERE title = :title")
     void deleteFavouriteMovie(String title);
 
-    // Deletes all favorite movies from the database
-    @Query("DELETE FROM favouritemovie")
-    void deleteAllFavouriteMovies();
-
 }

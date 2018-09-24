@@ -21,6 +21,7 @@ public class PMReviewsSyncIntentService extends IntentService {
         Timber.d("Reviews Intent service started");
         if (null != intent) {
             mId = intent.getIntExtra(MOVIE_ID_KEY, 0);
+            // TODO: catch instances when mId is 0 because no intent extra was passed
         }
         MovieNetworkDataSource networkDataSource =
                 InjectorUtils.provideNetworkDataSource(this.getApplicationContext());

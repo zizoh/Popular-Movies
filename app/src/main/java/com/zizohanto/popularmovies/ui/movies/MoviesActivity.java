@@ -17,13 +17,13 @@ public class MoviesActivity extends AppCompatActivity {
     }
 
     private void addFragmentToActivity() {
-        MoviesFragment tasksFragment =
+        MoviesFragment moviesFragment =
                 (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
-        if (tasksFragment == null) {
+        if (moviesFragment == null) {
             // Create the fragment
-            tasksFragment = MoviesFragment.newInstance();
+            moviesFragment = MoviesFragment.newInstance();
             ActivityUtils.addFragmentToActivity(
-                    getSupportFragmentManager(), tasksFragment, R.id.contentFrame);
+                    getSupportFragmentManager(), moviesFragment, R.id.contentFrame);
         }
     }
     /* Add Common Project Requirements */
