@@ -7,7 +7,6 @@ import com.zizohanto.popularmovies.data.PopularMoviesRepository;
 import com.zizohanto.popularmovies.data.database.PopularMovieDatabase;
 import com.zizohanto.popularmovies.data.network.MovieNetworkDataSource;
 import com.zizohanto.popularmovies.ui.details.DetailsFragViewModelFactory;
-import com.zizohanto.popularmovies.ui.favourites.FavouritesFragViewModelFactory;
 import com.zizohanto.popularmovies.ui.movies.MoviesFragViewModelFactory;
 
 /**
@@ -34,9 +33,10 @@ public class InjectorUtils {
         return MovieNetworkDataSource.getInstance(context.getApplicationContext(), executors);
     }
 
-    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, Integer id) {
+    public static DetailsFragViewModelFactory provideDFViewModelFactory(Context context, String title,
+                                                                        Integer id) {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-        return new DetailsFragViewModelFactory(repository, id);
+        return new DetailsFragViewModelFactory(repository, title, id);
     }
 
     public static MoviesFragViewModelFactory provideMFViewModelFactory(Context context,
@@ -46,12 +46,6 @@ public class InjectorUtils {
         PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
 
         return new MoviesFragViewModelFactory(repository, moviesSortType, isNotFirstPreferenceChange, pageToLoad);
-    }
-
-    public static FavouritesFragViewModelFactory provideFFViewModelFactory(Context context) {
-        PopularMoviesRepository repository = provideRepository(context.getApplicationContext());
-
-        return new FavouritesFragViewModelFactory(repository);
     }
 
 }

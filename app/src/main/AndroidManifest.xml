@@ -27,14 +27,6 @@
                 android:value=".ui.movies.MoviesActivity" />
         </activity>
 
-        <activity
-            android:name=".ui.favourites.FavouritesActivity"
-            android:parentActivityName=".ui.movies.MoviesActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.movies.MoviesActivity" />
-        </activity>
-
         <!-- Required for immediate syncs -->
         <service
             android:name=".data.network.PMMoviesSyncIntentService"

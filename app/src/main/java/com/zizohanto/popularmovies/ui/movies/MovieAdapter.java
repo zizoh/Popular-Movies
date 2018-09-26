@@ -22,7 +22,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     private Context mContext;
     private MovieItemClickListener mOnClickListener;
 
-    public MovieAdapter(Context context, MovieItemClickListener listener) {
+    MovieAdapter(Context context, MovieItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
     }
@@ -68,7 +68,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieData(List<Movie> newMovies) {
-        notifyDataSetChanged();
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
@@ -94,15 +93,23 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                     // TODO: fix ArrayIndexOutOfBound bug where adapter position is bigger than 20
                     // cos it isn't reset when preference is changed
+
                     Movie newMovie = newMovies.get(newItemPosition);
                     Movie oldMovie = newMovies.get(oldItemPosition);
-                    return newMovie.getId() == oldMovie.getId()
-                            && newMovie.getTitle().equals(oldMovie.getTitle());
+                    boolean contentsTheSame = false;
+                    try {
+                        contentsTheSame = newMovie.getId() == oldMovie.getId()
+                                && newMovie.getTitle().equals(oldMovie.getTitle());
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        notifyDataSetChanged();
+                    }
+                    return contentsTheSame;
                 }
             });
             mMovies = newMovies;
             result.dispatchUpdatesTo(this);
         }
+        notifyDataSetChanged();
     }
 
     public interface MovieItemClickListener {

@@ -33,6 +33,7 @@ import java.util.List;
 
 public class DetailsFragment extends Fragment implements View.OnClickListener,
         VideoAdapter.VideoItemClickListener {
+    public static final String MOVIE_TITLE_EXTRA = "MOVIE_TITLE_EXTRA";
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
     private static final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
@@ -80,6 +81,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         mContext = getActivity();
 
         if (null != getArguments()) {
+            mTitle = getArguments().getString(MOVIE_TITLE_EXTRA);
             mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
@@ -89,7 +91,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
 
         setUpReviewsView();
 
-        setupViewModel(mId);
+        setupViewModel(mTitle, mId);
 
         observeMovies();
 
@@ -128,9 +130,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         mRecyclerViewReviews.setAdapter(mReviewAdapter);
     }
 
-    private void setupViewModel(Integer id) {
+    private void setupViewModel(String title, Integer id) {
         DetailsFragViewModelFactory factory = InjectorUtils.
-                provideDFViewModelFactory(mContext, id);
+                provideDFViewModelFactory(mContext, title, id);
         mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 
