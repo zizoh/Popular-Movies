@@ -359,4 +359,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mSharedPreference.unregisterOnSharedPreferenceChangeListener(this);
     }
+
+    // TODO: Change title of fragment according to sort preference
 }

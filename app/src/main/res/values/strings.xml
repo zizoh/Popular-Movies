@@ -5,16 +5,19 @@
     <string name="nav_most_popular">Most Popular</string>
     <string name="nav_highest_rated">Top Rated</string>
     <string name="nav_favorite">Favorite</string>
-    <string name="movie_poster">Movie poster</string>
-    <string name="video_thumbnail">Video thumbnail</string>
+    <string name="movie_poster_description">Movie poster</string>
     <string name="tv_title">The Meg</string>
     <string name="tv_vote_average">6.6</string>
     <string name="tv_release_date">Released: 2018</string>
     <string name="tv_plot_synopsis">A deep sea submersible pilot revisits his past fears in the Mariana Trench, and accidentally unleashes the seventy foot ancestor of the Great White Shark believed to be extinct.</string>
     <string name="tv_popularity">(127.639)</string>
     <string name="image_placeholder">Movie Poster</string>
-    <string name="reviewer_name">antimony</string>
+    <string name="details_frag_bottom_videos_title">Videos</string>
+    <string name="video_thumbnail_description">Video thumbnail</string>
+    <string name="play_button_description">Play button</string>
+    <string name="details_frag_bottom_reviews_title">Reviews</string>
     <string name="review">Appallingly cliched. Slow and boring. Not even the Conjuring hype could save this film. It moves forward at a painful pace, brings nothing new to the table, and is not even scary.</string>
+    <string name="reviewer_name">antimony</string>
 
     <!-- Key name for storing sort-by in SharedPreferences -->
     <string name="pref_key_sort_by" translatable="false">Sort-by</string>
@@ -27,5 +30,4 @@
 
     <!-- Value in SharedPreferences for sort-by Favorite option -->
     <string name="pref_sort_by_favorite_value" translatable="false">favorite</string>
-
 </resources>

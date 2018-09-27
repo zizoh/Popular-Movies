@@ -4,27 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <android.support.constraint.ConstraintLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
+
+        <com.zizohanto.popularmovies.ui.details.ExpandableTextView
+            android:id="@+id/tv_review_content"
+            style="@style/TextViewTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/review" />
 
         <TextView
             android:id="@+id/tv_review_author"
             style="@style/TextViewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_review_content"
             tools:text="@string/reviewer_name" />
-
-        <TextView
-            android:id="@+id/tv_review_content"
-            style="@style/TextViewTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_review_author"
-            tools:text="@string/review" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

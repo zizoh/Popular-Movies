@@ -87,14 +87,13 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
 
     class ReviewAdapterViewHolder extends RecyclerView.ViewHolder {
         private TextView mReviewAuthor;
-        private TextView mReviewContent;
+        private ExpandableTextView mReviewContent;
 
         private ReviewAdapterViewHolder(View itemView) {
             super(itemView);
 
             mReviewAuthor = itemView.findViewById(R.id.tv_review_author);
             mReviewContent = itemView.findViewById(R.id.tv_review_content);
-
         }
 
         void bind(Review review) {

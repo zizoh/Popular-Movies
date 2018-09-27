@@ -140,7 +140,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             Picasso.with(mContext)
                     .load(buildCompletePosterUrl(posterUrl))
                     .error(mContext.getResources().getDrawable(R.drawable.no_image))
-                    .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
+                    .placeholder(mContext.getResources().getDrawable(R.drawable.im_poster_placeholder))
                     .into(mMoviePoster);
 
             mMovieTitle.setText(movie.getTitle());

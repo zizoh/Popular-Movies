@@ -37,16 +37,16 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
     private static final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
-    private String mTitle;
     private Integer mId;
+    private String mTitle;
 
     private DetailsFragBinding mDetailsFragBinding;
+    private Context mContext;
     private DetailsFragViewModel mViewModel;
-    private VideoAdapter mVideoAdapter;
-    private ReviewAdapter mReviewAdapter;
     private RecyclerView mRecyclerViewVideos;
     private RecyclerView mRecyclerViewReviews;
-    private Context mContext;
+    private VideoAdapter mVideoAdapter;
+    private ReviewAdapter mReviewAdapter;
 
     public DetailsFragment() {
         // Requires empty public constructor
@@ -85,7 +85,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
-        mDetailsFragBinding.cbFavourite.setOnClickListener(this);
+        //mDetailsFragBinding.cbFavourite.setOnClickListener(this);
 
         setUpVideosView();
 
@@ -105,7 +105,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     }
 
     private void setUpVideosView() {
-        mRecyclerViewVideos = mDetailsFragBinding.rvVideos;
+        mRecyclerViewVideos = mDetailsFragBinding.llDetailsFragBottom.rvVideos;
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -118,7 +118,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     }
 
     private void setUpReviewsView() {
-        mRecyclerViewReviews = mDetailsFragBinding.rvReviews;
+        mRecyclerViewReviews = mDetailsFragBinding.llDetailsFragBottom.rvReviews;
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -145,32 +145,38 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
                     Picasso.with(mContext)
                             .load(buildCompleteBackdropUrl(posterUrl))
                             .error(mContext.getResources().getDrawable(R.drawable.no_image))
-                            .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
-                            .into(mDetailsFragBinding.ivBackdropImage);
+                            .placeholder(mContext.getResources().getDrawable(R.drawable
+                                    .im_poster_placeholder))
+                            .into(mDetailsFragBinding.clDetailsFragTop.ivBackdropImage);
 
                     String title = movie.getTitle();
-                    mDetailsFragBinding.tvTitle.setText(title);
+                    mDetailsFragBinding.clDetailsFragTop.tvTitle.setText(title);
 
-                    LayerDrawable layerDrawable = (LayerDrawable) mDetailsFragBinding.rating.getProgressDrawable();
-                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(0)), Color.WHITE);
-                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(1)), Color.YELLOW);
-                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(2)), Color.YELLOW);
+                    LayerDrawable layerDrawable = (LayerDrawable) mDetailsFragBinding
+                            .clDetailsFragTop.rating.getProgressDrawable();
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(0)),
+                            Color.WHITE);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(1)),
+                            Color.YELLOW);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(2)),
+                            Color.YELLOW);
 
                     Double voteAverage = movie.getVoteAverage();
                     float d = (float) (voteAverage / 2);
 
-                    mDetailsFragBinding.rating.setRating(d);
+                    mDetailsFragBinding.clDetailsFragTop.rating.setRating(d);
 
                     String popularity = String.valueOf(movie.getPopularity());
-                    mDetailsFragBinding.tvPopularity.setText(
+                    mDetailsFragBinding.clDetailsFragTop.tvPopularity.setText(
                             String.format("(%s)", popularity));
 
                     String releaseDate = movie.getReleaseDate();
                     String releaseYear = releaseDate.substring(0, 4);
-                    mDetailsFragBinding.tvReleaseYear.setText(String.format("Released: %s", releaseYear));
+                    mDetailsFragBinding.clDetailsFragTop.tvReleaseYear.setText(String
+                            .format("Released: %s", releaseYear));
 
                     String synopsis = movie.getOverview();
-                    mDetailsFragBinding.tvPlotSynopsis.setText(synopsis);
+                    mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
                 }
             }
         });
@@ -181,7 +187,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onChanged(@Nullable FavouriteMovie favouriteMovie) {
                 if (favouriteMovie != null) {
-                    mDetailsFragBinding.cbFavourite.setChecked(true);
+                    mDetailsFragBinding.clDetailsFragTop.cbFavourite.setChecked(true);
                 }
             }
         });
@@ -237,6 +243,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
                 }
         }
     }
+
+    // TODO: Change title of fragment to Movie Detail
 
     private void saveFavourite() {
         mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId));

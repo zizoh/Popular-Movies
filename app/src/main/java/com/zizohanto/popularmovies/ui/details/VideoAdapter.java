@@ -16,7 +16,7 @@ import com.zizohanto.popularmovies.data.database.video.Video;
 import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapterViewHolder> {
-    private static final String YOUTUBE_THUMBNAIL = "https://img.youtube.com/vi/%s/mqdefault.jpg";
+    private static final String YOUTUBE_THUMBNAIL = "https://img.youtube.com/vi/%s/hqdefault.jpg";
     private static final String VIDEO_TYPE_TRAILER = "Trailer";
     private List<Video> mVideos;
     private Context mContext;
@@ -123,7 +123,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
         void bind(Video video) {
             Picasso.with(mContext)
                     .load(buildVideoThumbnailUrl(video.getKey()))
-                    .placeholder(mContext.getResources().getDrawable(R.drawable.poster_placeholder))
+                    .placeholder(mContext.getResources().getDrawable(R.drawable.im_video_placeholder))
                     .into(mVideoThumbnail);
 
         }
