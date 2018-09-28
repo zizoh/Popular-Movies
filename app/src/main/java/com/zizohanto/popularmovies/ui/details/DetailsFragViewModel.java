@@ -23,7 +23,7 @@ class DetailsFragViewModel extends ViewModel {
     public DetailsFragViewModel(PopularMoviesRepository repository, Integer id) {
         mRepository = repository;
         mId = id;
-        mRepository.setFetchMovieCriteria(mId);
+        mRepository.setFetchMoviesCriteria(mId);
         mMovie = mRepository.getMovie();
         mVideos = mRepository.getVideos();
         mRevies = mRepository.getReviews();

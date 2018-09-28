@@ -31,8 +31,6 @@ import com.zizohanto.popularmovies.utils.InjectorUtils;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 public class DetailsFragment extends Fragment implements View.OnClickListener,
         VideoAdapter.VideoItemClickListener {
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
@@ -245,7 +243,6 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             case R.id.cb_favourite:
                 if (checked) {
                     saveFavourite();
-                    Timber.e("Fav button clicked");
                 } else {
                     deleteFavourite();
                 }

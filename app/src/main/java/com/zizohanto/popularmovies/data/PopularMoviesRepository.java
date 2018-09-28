@@ -221,7 +221,7 @@ public class PopularMoviesRepository {
         }
     }
 
-    public void setFetchMovieCriteria(Integer movieId) {
+    public void setFetchMoviesCriteria(Integer movieId) {
         mMovieId = movieId;
     }
 

@@ -221,5 +221,20 @@ public class Movie {
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Movie) {
+            Movie temp = (Movie) obj;
+            return this.getId() == temp.getId();
+        }
+        return false;
+    }
+
+
+    @Override
+    public int hashCode() {
+        return (this.getId().hashCode());
+    }
 }
 
