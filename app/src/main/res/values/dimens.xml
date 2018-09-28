@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="layout_margin">8dp</dimen>
+    <dimen name="textview_padding">8dp</dimen>
+    <dimen name="ratingbar_margin_left">8dp</dimen>
+    <dimen name="ratingbar_margin_start">@dimen/ratingbar_margin_left</dimen>
+    <dimen name="title_textsize">24sp</dimen>
+    <dimen name="fav_button_margin_right">16dp</dimen>
+    <dimen name="fav_button_margin_end">@dimen/fav_button_margin_right</dimen>
+
+</resources>

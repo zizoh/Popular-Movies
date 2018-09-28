@@ -6,7 +6,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_margin="@dimen/layout_margin">
 
         <com.zizohanto.popularmovies.ui.details.ExpandableTextView
             android:id="@+id/tv_review_content"

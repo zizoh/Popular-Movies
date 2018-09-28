@@ -10,7 +10,7 @@
             style="@style/DetailsTitleTextViewsTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="@dimen/textview_padding"
             android:text="@string/details_frag_bottom_videos_title" />
 
         <android.support.v7.widget.RecyclerView
@@ -23,7 +23,7 @@
             style="@style/DetailsTitleTextViewsTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="@dimen/textview_padding"
             android:text="@string/details_frag_bottom_reviews_title" />
 
         <android.support.v7.widget.RecyclerView
