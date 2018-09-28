@@ -9,23 +9,34 @@ public class FavouriteMovie {
 
     @PrimaryKey(autoGenerate = true)
     private int roomId;
+    private int listType;
     private String title;
     private Integer id;
 
     @Ignore
-    public FavouriteMovie(String mTitle, Integer id) {
+    public FavouriteMovie(String mTitle, Integer id, int listType) {
         this.title = mTitle;
         this.id = id;
+        this.listType = listType;
     }
 
-    public FavouriteMovie(int roomId, String title, Integer id) {
+    public FavouriteMovie(int roomId, String title, Integer id, int listType) {
         this.roomId = roomId;
         this.title = title;
         this.id = id;
+        this.listType = listType;
     }
 
     public int getRoomId() {
         return roomId;
+    }
+
+    public int getListType() {
+        return listType;
+    }
+
+    public void setListType(int listType) {
+        this.listType = listType;
     }
 
     public String getTitle() {

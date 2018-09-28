@@ -36,6 +36,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     public static final String MOVIE_ID_EXTRA = "MOVIE_ID_EXTRA";
     private static final String YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
+    private int mListTpye;
     private Integer mId;
     private String mTitle;
 
@@ -182,6 +183,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
 
                     String synopsis = movie.getOverview();
                     mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
+
+                    mListTpye = movie.getListType();
                 }
             }
         });
@@ -250,7 +253,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     }
 
     private void saveFavourite() {
-        mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId));
+        mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId, mListTpye));
     }
 
     private void deleteFavourite() {

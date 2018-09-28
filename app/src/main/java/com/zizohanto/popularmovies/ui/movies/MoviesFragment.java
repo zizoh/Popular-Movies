@@ -32,8 +32,6 @@ import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -278,14 +276,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
                 if (isFavouriteView) {
-                    setMoviesToAdapter(removeDuplicatesFromList(movies));
+                    setMoviesToAdapter(movies);
                 }
             }
         });
-    }
-
-    private List<Movie> removeDuplicatesFromList(List<Movie> movies) {
-        return new ArrayList<>(new LinkedHashSet<>(movies));
     }
 
     private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {
