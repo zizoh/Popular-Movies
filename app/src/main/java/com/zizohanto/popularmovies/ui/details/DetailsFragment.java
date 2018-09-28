@@ -85,7 +85,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
-        //mDetailsFragBinding.cbFavourite.setOnClickListener(this);
+        mDetailsFragBinding.clDetailsFragTop.cbFavourite.setOnClickListener(this);
 
         setUpVideosView();
 
