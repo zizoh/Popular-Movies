@@ -17,7 +17,6 @@ import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapterViewHolder> {
     private static final String YOUTUBE_THUMBNAIL = "https://img.youtube.com/vi/%s/hqdefault.jpg";
-    private static final String VIDEO_TYPE_TRAILER = "Trailer";
     private List<Video> mVideos;
     private Context mContext;
     private VideoItemClickListener mVideoItemClickListener;
@@ -44,23 +43,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
         if (null == mVideos) {
             return 0;
         } else {
-            return getNumberOfTrailers(mVideos);
+            return mVideos.size();
         }
-    }
-
-    private int getNumberOfTrailers(List<Video> videos) {
-        int count = 0;
-        for (int i = 0; i < videos.size(); i++) {
-            if (isVideoTrailer(videos.get(i))) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private boolean isVideoTrailer(Video video) {
-        String videoType = video.getType();
-        return videoType.equals(VIDEO_TYPE_TRAILER);
     }
 
     @Override
@@ -72,6 +56,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
         // If there was no video data, then recreate all of the list
         if (mVideos == null) {
             mVideos = newVideos;
+            notifyDataSetChanged();
         } else {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
@@ -101,7 +86,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
             mVideos = newVideos;
             result.dispatchUpdatesTo(this);
         }
-        notifyDataSetChanged();
     }
 
     public interface VideoItemClickListener {

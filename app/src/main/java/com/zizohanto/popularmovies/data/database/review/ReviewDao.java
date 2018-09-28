@@ -10,22 +10,18 @@ import java.util.List;
 
 @Dao
 public interface ReviewDao {
-    // Returns a list of all reviews of the movie from the database
-    @Query("SELECT * FROM review")
-    LiveData<List<Review>> getAllReviews();
-
     /**
-     * @param id The id you want reviews for
+     * @param movieId Movie id you want reviews for
      * @return {@link LiveData} of reviews with movie id specified
      */
-    @Query("SELECT * FROM review WHERE id = :id")
-    LiveData<List<Review>> getReviewsOfMovieId(Integer id);
+    @Query("SELECT * FROM review WHERE movieId = :movieId")
+    LiveData<List<Review>> getReviewsOfMovie(int movieId);
 
     // Inserts multiple reviews
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<Review> reviews);
 
-    // Deletes all reviews from the database
-    @Query("DELETE FROM review")
-    void deleteAllReviews();
+    // Deletes all reviews of movie specified from the database
+    @Query("DELETE FROM review WHERE movieId == :movieId")
+    void deleteReviewsOfMovie(int movieId);
 }

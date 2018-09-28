@@ -18,18 +18,16 @@ class DetailsFragViewModel extends ViewModel {
     private final LiveData<List<Video>> mVideos;
     private final LiveData<List<Review>> mRevies;
     private final LiveData<FavouriteMovie> mFavouriteMovie;
-    private final String mTitle;
     private final Integer mId;
 
-    public DetailsFragViewModel(PopularMoviesRepository repository,
-                                String title, Integer id) {
+    public DetailsFragViewModel(PopularMoviesRepository repository, Integer id) {
         mRepository = repository;
-        mTitle = title;
         mId = id;
-        mMovie = mRepository.getMovieByTitle(mTitle);
-        mVideos = mRepository.getVideosOfMovieId(mId);
-        mRevies = mRepository.getReviewsOfMovieId(mId);
-        mFavouriteMovie = mRepository.getFavouriteMovieWithTitle(mTitle);
+        mRepository.setFetchMovieCriteria(mId);
+        mMovie = mRepository.getMovie();
+        mVideos = mRepository.getVideos();
+        mRevies = mRepository.getReviews();
+        mFavouriteMovie = mRepository.getFavouriteMovie();
 
     }
 
@@ -54,7 +52,7 @@ class DetailsFragViewModel extends ViewModel {
     }
 
     public void deleteFavouriteMovie() {
-        mRepository.deleteFavouriteMovieWithTitle(mTitle);
+        mRepository.deleteFavouriteMovie();
     }
 
 

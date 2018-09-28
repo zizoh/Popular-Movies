@@ -12,6 +12,8 @@ public class Video {
     @PrimaryKey(autoGenerate = true)
     private int videoRoomId;
 
+    private int movieId;
+
     @SerializedName("id")
     private String id;
 
@@ -63,6 +65,14 @@ public class Video {
 
     public int getVideoRoomId() {
         return videoRoomId;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public String getId() {

@@ -36,11 +36,12 @@ public class PopularMoviesRepository {
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
 
+    private int mMovieId;
     private int mListType;
-    private String mMoviesSortType;
-    private int mPageToLoad = 0;
+    private int mPageToLoad;
     private boolean mInitialized = false;
     private boolean mIsNotPreferenceChange;
+    private String mMoviesSortType;
 
     private PopularMoviesRepository(MovieDao movieDao,
                                     VideoDao videoDao,
@@ -153,14 +154,14 @@ public class PopularMoviesRepository {
      * Deletes old videos data
      */
     private void deleteOldVideoData() {
-        mVideoDao.deleteAllVideos();
+        mVideoDao.deleteVideosOfMovie(mMovieId);
     }
 
     /**
      * Deletes old reviews data
      */
     private void deleteOldReviewData() {
-        mReviewDao.deleteAllReviews();
+        mReviewDao.deleteReviewsOfMovie(mMovieId);
     }
 
     /**
@@ -208,7 +209,7 @@ public class PopularMoviesRepository {
         });
     }
 
-    public void setFetchCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
+    public void setFetchMoviesCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
@@ -218,6 +219,10 @@ public class PopularMoviesRepository {
         } else if (mMoviesSortType.equals("movie/top_rated")) {
             mListType = 2;
         }
+    }
+
+    public void setFetchMovieCriteria(Integer movieId) {
+        mMovieId = movieId;
     }
 
     public LiveData<NetworkState> getNetworkState() {
@@ -232,9 +237,9 @@ public class PopularMoviesRepository {
         return mMovieDao.getMoviesByType(mListType);
     }
 
-    public LiveData<Movie> getMovieByTitle(String title) {
+    public LiveData<Movie> getMovie() {
         initializeData();
-        return mMovieDao.getMovieByTitle(title);
+        return mMovieDao.getMovieById(mMovieId);
     }
 
     /*
@@ -247,21 +252,19 @@ public class PopularMoviesRepository {
     /*
      *  Trailers database operations
      */
-    public LiveData<List<Video>> getVideosOfMovieId(Integer id) {
-        Timber.d("Getting videos for movie with id: %s", String.valueOf(id));
-        startFetchVideosService(id);
-        // TODO: make video objects contain their movie id
-        return mVideoDao.getAllVideos();
+    public LiveData<List<Video>> getVideos() {
+        Timber.d("Getting videos for movie with id: %s", String.valueOf(mMovieId));
+        startFetchVideosService(mMovieId);
+        return mVideoDao.getVideosOfMovie(mMovieId);
     }
 
     /*
      *  Reviews database operations
      */
-    public LiveData<List<Review>> getReviewsOfMovieId(Integer id) {
-        Timber.d("Getting reviews for movie with id: %s", String.valueOf(id));
-        startFetchReviewsService(id);
-        // TODO: make review objects contain their movie id
-        return mReviewDao.getAllReviews();
+    public LiveData<List<Review>> getReviews() {
+        Timber.d("Getting reviews for movie with id: %s", String.valueOf(mMovieId));
+        startFetchReviewsService(mMovieId);
+        return mReviewDao.getReviewsOfMovie(mMovieId);
     }
 
     /*
@@ -272,9 +275,9 @@ public class PopularMoviesRepository {
         return mFavouriteMovieDao.getAllFavouriteMovies();
     }
 
-    public LiveData<FavouriteMovie> getFavouriteMovieWithTitle(String title) {
-        Timber.d("Getting favourite movie with title: %s", title);
-        return mFavouriteMovieDao.getFavouriteMovieWithTitle(title);
+    public LiveData<FavouriteMovie> getFavouriteMovie() {
+        Timber.d("Getting favourite movie with id: %s", mMovieId);
+        return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId);
     }
 
     public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {
@@ -287,12 +290,12 @@ public class PopularMoviesRepository {
         });
     }
 
-    public void deleteFavouriteMovieWithTitle(String title) {
-        Timber.d("Deleting favourite movie with title: %s", title);
+    public void deleteFavouriteMovie() {
+        Timber.d("Deleting favourite movie with id: %s", mMovieId);
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                mFavouriteMovieDao.deleteFavouriteMovie(title);
+                mFavouriteMovieDao.deleteFavouriteMovie(mMovieId);
             }
         });
     }

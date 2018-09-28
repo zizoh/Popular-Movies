@@ -196,11 +196,15 @@ public class MovieNetworkDataSource {
                     public void onResponse(@NonNull Call<VideoResponse> call, @NonNull Response<VideoResponse> response) {
                         Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
-                            List<Video> videos = response.body().getVideos();
+                            VideoResponse videoResponse = response.body();
+                            List<Video> videos = videoResponse.getVideos();
                             if (videos == null) {
-                                Timber.d("Movie does not have videos");
+                                Timber.d("No videos available for selected movie");
                             } else {
                                 Timber.d("Number of videos received: %s", videos.size());
+                            }
+                            for (int i = 0; i < videos.size(); i++) {
+                                videos.get(i).setMovieId(videoResponse.getId());
                             }
                             mDownloadedVideos.postValue(videos);
                         } else {
@@ -234,11 +238,15 @@ public class MovieNetworkDataSource {
                     public void onResponse(@NonNull Call<ReviewResponse> call, @NonNull Response<ReviewResponse> response) {
                         Timber.d("got a response %s", response);
                         if (response.isSuccessful()) {
-                            List<Review> reviews = response.body().getReviews();
+                            ReviewResponse reviewResponse = response.body();
+                            List<Review> reviews = reviewResponse.getReviews();
                             if (reviews == null) {
                                 Timber.d("No review available for selected movie");
                             } else {
                                 Timber.d("Number of reviews received: %s", reviews.size());
+                            }
+                            for (int i = 0; i < reviews.size(); i++) {
+                                reviews.get(i).setMovieId(reviewResponse.getId());
                             }
                             mDownloadedReviews.postValue(reviews);
                         } else {

@@ -12,6 +12,8 @@ public class Review {
     @PrimaryKey(autoGenerate = true)
     private int reviewRoomId;
 
+    private int movieId;
+
     @SerializedName("author")
     private String author;
 
@@ -42,6 +44,14 @@ public class Review {
 
     public int getReviewRoomId() {
         return reviewRoomId;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public String getAuthor() {

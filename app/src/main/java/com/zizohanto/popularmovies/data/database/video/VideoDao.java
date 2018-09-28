@@ -10,22 +10,18 @@ import java.util.List;
 
 @Dao
 public interface VideoDao {
-    // Returns a list of all videos of the movie from the database
-    @Query("SELECT * FROM video")
-    LiveData<List<Video>> getAllVideos();
-
     /**
-     * @param id The id you want videos for
+     * @param movieId Movie id you want videos for
      * @return {@link LiveData} of videos with movie id specified
      */
-    @Query("SELECT * FROM video WHERE id = :id")
-    LiveData<List<Video>> getVideosOfMovieId(Integer id);
+    @Query("SELECT * FROM video WHERE movieId == :movieId")
+    LiveData<List<Video>> getVideosOfMovie(int movieId);
 
     // Inserts multiple videos
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<Video> videos);
 
-    // Deletes all videos from the database
-    @Query("DELETE FROM video")
-    void deleteAllVideos();
+    // Deletes all videos of movie specified from the database
+    @Query("DELETE FROM video WHERE movieId == :movieId")
+    void deleteVideosOfMovie(int movieId);
 }

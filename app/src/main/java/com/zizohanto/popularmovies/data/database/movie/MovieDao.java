@@ -10,16 +10,12 @@ import java.util.List;
 
 @Dao
 public interface MovieDao {
-    // Returns a list of all movies in the database
-    @Query("SELECT * FROM movie")
-    LiveData<List<Movie>> getAllMovies();
-
     /**
-     * @param title The title you want movie for
-     * @return {@link LiveData} of movie with title specified
+     * @param id The id you want movie for
+     * @return {@link LiveData} of movie with id specified
      */
-    @Query("SELECT * FROM movie WHERE title = :title")
-    LiveData<Movie> getMovieByTitle(String title);
+    @Query("SELECT * FROM movie WHERE id = :id")
+    LiveData<Movie> getMovieById(int id);
 
     /**
      * @param listType The listType you want movies for
@@ -40,10 +36,13 @@ public interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<Movie> movies);
 
-    // Deletes all movies from the database
-    @Query("DELETE FROM movie")
-    void deleteAllMovies();
+    //
 
+    /**
+     * Deletes all movies of type specified from the database
+     *
+     * @param listType the type of movies to be deleted
+     */
     @Query("DELETE FROM movie WHERE listType == :listType")
     void deleteMoviesByListType(int listType);
 }
