@@ -98,9 +98,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    // TODO: fix ArrayIndexOutOfBound bug where adapter position is bigger than 20
-                    // cos it isn't reset when preference is changed
-
                     boolean contentsTheSame = true;
                     try {
                         Movie newMovie = newMovies.get(newItemPosition);
