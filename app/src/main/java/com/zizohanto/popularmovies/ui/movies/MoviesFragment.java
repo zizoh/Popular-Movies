@@ -39,8 +39,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String KEY_PAGE_TO_LOAD = "PAGE_TO_LOAD";
+    private static final String KEY_IS_LOADING = "IS_LOADING";
 
     private int mPageToLoad = 1;
+    private boolean isFirstTimeFetch = true;
     private boolean isLoading;
     private boolean isFavouriteView;
     private String mMoviesSortType;
@@ -92,6 +94,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         if (savedInstanceState != null) {
             mPageToLoad = savedInstanceState.getInt(KEY_PAGE_TO_LOAD);
+            isLoading = savedInstanceState.getBoolean(KEY_IS_LOADING);
         }
         setupSharedPreferences();
         setupViewModel();
@@ -105,82 +108,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(KEY_PAGE_TO_LOAD, mPageToLoad);
+        outState.putBoolean(KEY_IS_LOADING, isLoading);
 
         super.onSaveInstanceState(outState);
-    }
-
-    private void setupSharedPreferences() {
-        mSharedPreference = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mMoviesSortType = mSharedPreference.getString(getString(R.string.pref_key_sort_by),
-                getString(R.string.pref_sort_by_popularity_value));
-
-        // If the current sort preference is by Favorites
-        if (getString(R.string.pref_sort_by_favorite_value).equals(mMoviesSortType)) {
-            isFavouriteView = true;
-        }
-        mSharedPreference.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    private void setupViewModel() {
-        MoviesFragViewModelFactory factory =
-                InjectorUtils.provideMFViewModelFactory(mContext,
-                        mMoviesSortType, true, mPageToLoad);
-        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
-    }
-
-    private void observeMovies() {
-        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (!isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
-    }
-
-    private void observeNetworkState() {
-        mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
-            @Override
-            public void onChanged(@Nullable NetworkState networkState) {
-                if (networkState != null && !isFavouriteView) {
-                    if (networkState.getStatus() == NetworkState.Status.RUNNING) {
-                        loading(true);
-                    } else if (networkState.getStatus() == NetworkState.Status.FAILED) {
-                        loading(false);
-                        Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
-                        //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
-                    }
-                }
-            }
-        });
-    }
-
-    private void observeFavouriteMovies() {
-        loading(true);
-        mViewModel.getAllFavouriteMovies().observe(this, new Observer<List<FavouriteMovie>>() {
-            @Override
-            public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
-                if (favouriteMovies != null && favouriteMovies.size() != 0) {
-                    getMoviesFromFavourites(favouriteMovies);
-                }
-            }
-        });
-    }
-
-    private void getMoviesFromFavourites(List<FavouriteMovie> favouriteMovies) {
-        int[] ids = new int[favouriteMovies.size()];
-        for (int i = 0; i < favouriteMovies.size(); i++) {
-            ids[i] = favouriteMovies.get(i).getId();
-        }
-        mViewModel.getFavouriteMoviesByIds(ids).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
     }
 
     private void setMoviesToAdapter(@Nullable List<Movie> movies) {
@@ -247,6 +177,88 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         });
     }
 
+    private void setupSharedPreferences() {
+        mSharedPreference = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mMoviesSortType = mSharedPreference.getString(getString(R.string.pref_key_sort_by),
+                getString(R.string.pref_sort_by_popularity_value));
+
+        // If the current sort preference is by Favorites
+        if (getString(R.string.pref_sort_by_favorite_value).equals(mMoviesSortType)) {
+            isFavouriteView = true;
+        }
+        mSharedPreference.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setupViewModel() {
+        MoviesFragViewModelFactory factory =
+                InjectorUtils.provideMFViewModelFactory(mContext,
+                        mMoviesSortType, true, mPageToLoad);
+        mViewModel = ViewModelProviders.of(this, factory).get(MoviesFragViewModel.class);
+    }
+
+    private void observeMovies() {
+        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (!isFavouriteView) {
+                    if (isFirstTimeFetch) {
+                        setMoviesToAdapter(movies);
+                        isFirstTimeFetch = false;
+                    }
+                }
+            }
+        });
+    }
+
+    private void observeNetworkState() {
+        mViewModel.getNetworkState().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(@Nullable NetworkState networkState) {
+                if (networkState != null && !isFavouriteView) {
+                    if (networkState.getStatus() == NetworkState.Status.RUNNING) {
+                        loading(true);
+                    } else if (networkState.getStatus() == NetworkState.Status.FAILED) {
+                        loading(false);
+                        Toast.makeText(mContext, networkState.getMsg(), Toast.LENGTH_SHORT).show();
+                        //Snackbar.make(mTitle, networkState.getMsg(), Snackbar.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+    }
+
+    public void loading(boolean loading) {
+        isLoading = loading;
+        setLoadingIndicator(loading);
+    }
+
+    private void observeFavouriteMovies() {
+        loading(true);
+        mViewModel.getAllFavouriteMovies().observe(this, new Observer<List<FavouriteMovie>>() {
+            @Override
+            public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
+                if (favouriteMovies != null && favouriteMovies.size() != 0) {
+                    getMoviesFromFavourites(favouriteMovies);
+                }
+            }
+        });
+    }
+
+    private void getMoviesFromFavourites(List<FavouriteMovie> favouriteMovies) {
+        int[] ids = new int[favouriteMovies.size()];
+        for (int i = 0; i < favouriteMovies.size(); i++) {
+            ids[i] = favouriteMovies.get(i).getId();
+        }
+        mViewModel.getFavouriteMoviesByIds(ids).observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (isFavouriteView) {
+                    setMoviesToAdapter(movies);
+                }
+            }
+        });
+    }
+
     private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {
         return (visibleItemCount + firstVisibleItemPosition) >= totalItemCount &&
                 firstVisibleItemPosition >= 0;
@@ -255,17 +267,25 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void fetchFirstMovies() {
         loading(true);
         mPageToLoad = 1;
-        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
+        isFirstTimeFetch = true;
+        getMovies();
     }
 
     private void fetchMoreMovies() {
         loading(true);
-        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
+        getMovies();
     }
 
-    public void loading(boolean loading) {
-        isLoading = loading;
-        setLoadingIndicator(loading);
+    private void getMovies() {
+        //isNotFirstTimeFetch = false;
+        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad).observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (!isFavouriteView) {
+                    setMoviesToAdapter(movies);
+                }
+            }
+        });
     }
 
     private void showSortingPopUpMenu() {

@@ -22,6 +22,13 @@ public interface MovieDao {
     LiveData<Movie> getMovieByTitle(String title);
 
     /**
+     * @param listType The listType you want movies for
+     * @return {@link LiveData} of movies with listType specified
+     */
+    @Query("SELECT * FROM movie WHERE listType == :listType")
+    LiveData<List<Movie>> getMoviesByType(int listType);
+
+    /**
      * @param ids The ids you want movies for
      * @return {@link LiveData} of movies with ids specified
      */
@@ -36,4 +43,7 @@ public interface MovieDao {
     // Deletes all movies from the database
     @Query("DELETE FROM movie")
     void deleteAllMovies();
+
+    @Query("DELETE FROM movie WHERE listType == :listType")
+    void deleteMoviesByListType(int listType);
 }

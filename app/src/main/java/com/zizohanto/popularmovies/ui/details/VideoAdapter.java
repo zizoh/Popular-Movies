@@ -51,8 +51,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
     private int getNumberOfTrailers(List<Video> videos) {
         int count = 0;
         for (int i = 0; i < videos.size(); i++) {
-            Video video = videos.get(i);
-            if (isVideoTrailer(video)) {
+            if (isVideoTrailer(videos.get(i))) {
                 count++;
             }
         }
@@ -66,8 +65,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoAdapter
 
     @Override
     public void onBindViewHolder(@NonNull VideoAdapter.VideoAdapterViewHolder holder, int position) {
-        Video video = mVideos.get(position);
-        holder.bind(video);
+        holder.bind(mVideos.get(position));
     }
 
     public void setVideoData(List<Video> newVideos) {

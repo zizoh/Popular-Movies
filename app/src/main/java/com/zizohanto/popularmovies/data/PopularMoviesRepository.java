@@ -36,6 +36,7 @@ public class PopularMoviesRepository {
     private final MovieNetworkDataSource mMovieNetworkDataSource;
     private final AppExecutors mExecutors;
 
+    private int mListType;
     private String mMoviesSortType;
     private int mPageToLoad = 0;
     private boolean mInitialized = false;
@@ -69,6 +70,10 @@ public class PopularMoviesRepository {
                             deleteOldMovieData();
                             Timber.d("Old movies deleted");
                         }
+                        for (int i = 0; i < newMoviesFromNetwork.size(); i++) {
+                            newMoviesFromNetwork.get(i).setListType(mListType);
+                        }
+
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
                         Timber.d("New values inserted");
@@ -138,10 +143,10 @@ public class PopularMoviesRepository {
     }
 
     /**
-     * Deletes old movies data
+     * Deletes old movies data after new movies are fetched successfully
      */
     private void deleteOldMovieData() {
-        mMovieDao.deleteAllMovies();
+        mMovieDao.deleteMoviesByListType(mListType);
     }
 
     /**
@@ -207,6 +212,12 @@ public class PopularMoviesRepository {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
+
+        if (mMoviesSortType.equals("movie/popular")) {
+            mListType = 1;
+        } else if (mMoviesSortType.equals("movie/top_rated")) {
+            mListType = 2;
+        }
     }
 
     public LiveData<NetworkState> getNetworkState() {
@@ -217,9 +228,8 @@ public class PopularMoviesRepository {
      * Movies database related operations
      */
     public LiveData<List<Movie>> getCurrentMovies() {
-        Timber.d("Getting current movies: ");
         initializeData();
-        return mMovieDao.getAllMovies();
+        return mMovieDao.getMoviesByType(mListType);
     }
 
     public LiveData<Movie> getMovieByTitle(String title) {
@@ -227,6 +237,9 @@ public class PopularMoviesRepository {
         return mMovieDao.getMovieByTitle(title);
     }
 
+    /*
+     *  Returns a list of movies from the ids of favorite movies
+     */
     public LiveData<List<Movie>> getMoviesByIds(int[] ids) {
         return mMovieDao.getMoviesByIds(ids);
     }

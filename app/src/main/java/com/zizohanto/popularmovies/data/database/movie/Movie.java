@@ -14,6 +14,8 @@ public class Movie {
     @PrimaryKey(autoGenerate = true)
     private int roomId;
 
+    private int listType;
+
     @SerializedName("id")
     private Integer id;
 
@@ -98,6 +100,14 @@ public class Movie {
 
     public int getRoomId() {
         return roomId;
+    }
+
+    public int getListType() {
+        return listType;
+    }
+
+    public void setListType(int listType) {
+        this.listType = listType;
     }
 
     public Integer getVoteCount() {
