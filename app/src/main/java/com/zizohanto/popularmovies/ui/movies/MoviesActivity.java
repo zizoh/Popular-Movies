@@ -26,4 +26,8 @@ public class MoviesActivity extends AppCompatActivity {
                     getSupportFragmentManager(), tasksFragment, R.id.contentFrame);
         }
     }
+
+    public void setActionBarTitle(String title) {
+        getSupportActionBar().setTitle(title);
+    }
 }

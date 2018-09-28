@@ -41,6 +41,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private static final String KEY_PAGE_TO_LOAD = "PAGE_TO_LOAD";
     private static final String KEY_IS_LOADING = "IS_LOADING";
 
+    private MoviesSortType mCurrentSortType;
+
     private int mPageToLoad = 1;
     private boolean isFirstTimeFetch = true;
     private boolean isLoading;
@@ -97,6 +99,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             isLoading = savedInstanceState.getBoolean(KEY_IS_LOADING);
         }
         setupSharedPreferences();
+        setActionBarTitle();
         setupViewModel();
         observeMovies();
         observeNetworkState();
@@ -182,11 +185,31 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mMoviesSortType = mSharedPreference.getString(getString(R.string.pref_key_sort_by),
                 getString(R.string.pref_sort_by_popularity_value));
 
-        // If the current sort preference is by Favorites
-        if (getString(R.string.pref_sort_by_favorite_value).equals(mMoviesSortType)) {
+        if (mMoviesSortType.equals(getString(R.string.pref_sort_by_popularity_value))) {
+            mCurrentSortType = MoviesSortType.POPULAR_MOVIES;
+        } else if (mMoviesSortType.equals(getString(R.string.pref_sort_by_top_rated_value))) {
+            mCurrentSortType = MoviesSortType.TOP_RATED_MOVIES;
+        } else if (mMoviesSortType.equals(getString(R.string.pref_sort_by_favorite_value))) {
             isFavouriteView = true;
+            mCurrentSortType = MoviesSortType.FAVORITE_MOVIES;
         }
         mSharedPreference.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setActionBarTitle() {
+        MoviesActivity moviesActivity = (MoviesActivity) getActivity();
+        String activityTitle;
+        switch (mCurrentSortType) {
+            case FAVORITE_MOVIES:
+                activityTitle = getString(R.string.movies_act_title_favorite);
+                break;
+            case TOP_RATED_MOVIES:
+                activityTitle = getString(R.string.movies_act_title_top_rated);
+                break;
+            default:
+                activityTitle = getString(R.string.movies_act_title_popular);
+        }
+        moviesActivity.setActionBarTitle(activityTitle);
     }
 
     private void setupViewModel() {
@@ -302,19 +325,23 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                         editor.putString(getString(R.string.pref_key_sort_by),
                                 getString(R.string.pref_sort_by_favorite_value));
                         isFavouriteView = true;
+                        mCurrentSortType = MoviesSortType.FAVORITE_MOVIES;
                         break;
                     case R.id.top_rated:
                         editor.putString(getString(R.string.pref_key_sort_by),
                                 getString(R.string.pref_sort_by_top_rated_value));
                         isFavouriteView = false;
+                        mCurrentSortType = MoviesSortType.TOP_RATED_MOVIES;
                         break;
                     default:
                         editor.putString(getString(R.string.pref_key_sort_by),
                                 getString(R.string.pref_sort_by_popularity_value));
                         isFavouriteView = false;
+                        mCurrentSortType = MoviesSortType.POPULAR_MOVIES;
                         break;
                 }
                 editor.apply();
+                setActionBarTitle();
                 return true;
             }
         });
@@ -378,6 +405,4 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         mSharedPreference.unregisterOnSharedPreferenceChangeListener(this);
     }
-
-    // TODO: Change title of fragment according to sort preference
 }

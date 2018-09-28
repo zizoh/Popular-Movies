@@ -5,7 +5,11 @@
     <string name="nav_most_popular">Most Popular</string>
     <string name="nav_highest_rated">Top Rated</string>
     <string name="nav_favorite">Favorite</string>
+    <string name="movies_act_title_favorite">Favorite Movies</string>
+    <string name="movies_act_title_top_rated">Top Rated Movies</string>
+    <string name="movies_act_title_popular">Popular Movies</string>
     <string name="movie_poster_description">Movie poster</string>
+    <string name="details_act_title">Movie Details</string>
     <string name="tv_title">The Meg</string>
     <string name="tv_vote_average">6.6</string>
     <string name="tv_release_date">Released: 2018</string>

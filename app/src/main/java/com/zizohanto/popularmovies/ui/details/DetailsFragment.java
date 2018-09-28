@@ -79,6 +79,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         assert inflater != null;
         mDetailsFragBinding = DataBindingUtil.inflate(inflater, R.layout.details_frag, container, false);
         View root = mDetailsFragBinding.getRoot();
+        setActionBarTitle();
+
         mContext = getActivity();
 
         if (null != getArguments()) {
@@ -102,6 +104,11 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         observeReviews();
 
         return root;
+    }
+
+    private void setActionBarTitle() {
+        DetailsActivity detailsActivity = (DetailsActivity) getActivity();
+        detailsActivity.getSupportActionBar().setTitle(getString(R.string.details_act_title));
     }
 
     private void setUpVideosView() {
@@ -244,8 +251,6 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
                 }
         }
     }
-
-    // TODO: Change title of fragment to Movie Detail
 
     private void saveFavourite() {
         mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId));
