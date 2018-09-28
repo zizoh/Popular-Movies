@@ -246,7 +246,7 @@ public class PopularMoviesRepository {
      *  Returns a list of movies from the ids of favorite movies
      */
     public LiveData<List<Movie>> getMoviesByIds(int[] ids) {
-        return mMovieDao.getMoviesByIds(ids);
+        return mMovieDao.getMoviesByIds(ids, 0);
     }
 
     /*

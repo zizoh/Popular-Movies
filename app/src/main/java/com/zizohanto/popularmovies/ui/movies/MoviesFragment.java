@@ -35,16 +35,19 @@ import com.zizohanto.popularmovies.utils.NetworkState;
 import java.util.List;
 import java.util.Objects;
 
+import timber.log.Timber;
+
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String KEY_PAGE_TO_LOAD = "PAGE_TO_LOAD";
     private static final String KEY_IS_LOADING = "IS_LOADING";
+    private static final String KEY_IS_FIRST_TIME_FETCH = "IS_FIRST_TIME_FETCH";
 
     private MoviesSortType mCurrentSortType;
 
     private int mPageToLoad = 1;
-    private boolean isFirstTimeFetch = true;
+    private boolean isFirstTimeFetch;
     private boolean isLoading;
     private boolean isFavouriteView;
     private String mMoviesSortType;
@@ -94,9 +97,12 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         setHasOptionsMenu(true);
         setScrollListener(layoutManager);
 
+        isFirstTimeFetch = true;
+
         if (savedInstanceState != null) {
             mPageToLoad = savedInstanceState.getInt(KEY_PAGE_TO_LOAD);
             isLoading = savedInstanceState.getBoolean(KEY_IS_LOADING);
+            isFirstTimeFetch = savedInstanceState.getBoolean(KEY_IS_FIRST_TIME_FETCH);
         }
         setupSharedPreferences();
         setActionBarTitle();
@@ -112,6 +118,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(KEY_PAGE_TO_LOAD, mPageToLoad);
         outState.putBoolean(KEY_IS_LOADING, isLoading);
+        outState.putBoolean(KEY_IS_FIRST_TIME_FETCH, isFirstTimeFetch);
 
         super.onSaveInstanceState(outState);
     }
@@ -227,6 +234,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                     if (isFirstTimeFetch) {
                         setMoviesToAdapter(movies);
                         isFirstTimeFetch = false;
+                        Timber.e("First time movies recieved");
                     }
                 }
             }

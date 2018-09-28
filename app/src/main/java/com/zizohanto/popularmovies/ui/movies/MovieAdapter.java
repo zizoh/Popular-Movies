@@ -67,6 +67,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
+//            Timber.e("Fav size: " + mMovies.size());
+//            for (int i = 0; i < mMovies.size(); i++) {
+//                Timber.e("Fav title: " + mMovies.get(i).getId() + mMovies.get(i).getTitle());
+//            }
+            notifyDataSetChanged();
         } else {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
@@ -112,7 +117,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             mMovies = newMovies;
             result.dispatchUpdatesTo(this);
         }
-        notifyDataSetChanged();
     }
 
     public interface MovieItemClickListener {

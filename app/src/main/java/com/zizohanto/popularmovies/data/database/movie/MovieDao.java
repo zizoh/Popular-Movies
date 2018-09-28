@@ -28,8 +28,8 @@ public interface MovieDao {
      * @param ids The ids you want movies for
      * @return {@link LiveData} of movies with ids specified
      */
-    @Query("SELECT * FROM movie WHERE id IN(:ids)")
-    LiveData<List<Movie>> getMoviesByIds(int[] ids);
+    @Query("SELECT * FROM movie WHERE id IN(:ids) AND listType > :listType")
+    LiveData<List<Movie>> getMoviesByIds(int[] ids, int listType);
 
 
     // Inserts multiple movies
