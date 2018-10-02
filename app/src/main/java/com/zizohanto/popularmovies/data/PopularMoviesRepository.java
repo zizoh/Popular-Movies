@@ -272,9 +272,9 @@ public class PopularMoviesRepository {
         return mFavouriteMovieDao.getAllFavouriteMovies();
     }
 
-    public LiveData<FavouriteMovie> getFavouriteMovie(int mMovieId) {
+    public LiveData<FavouriteMovie> getFavouriteMovie() {
         Timber.d("Getting favourite movie with id: %s", mMovieId);
-        return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId, mListType);
+        return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId);
     }
 
     public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {

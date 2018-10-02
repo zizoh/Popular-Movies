@@ -64,7 +64,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieData(List<Movie> newMovies) {
-        Timber.e("Movies don show!");
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;

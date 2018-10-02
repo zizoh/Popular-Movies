@@ -27,7 +27,7 @@ class DetailsFragViewModel extends ViewModel {
         mMovie = mRepository.getMovie();
         mVideos = mRepository.getVideos();
         mRevies = mRepository.getReviews();
-        mFavouriteMovie = mRepository.getFavouriteMovie(mId);
+        mFavouriteMovie = mRepository.getFavouriteMovie();
 
     }
 

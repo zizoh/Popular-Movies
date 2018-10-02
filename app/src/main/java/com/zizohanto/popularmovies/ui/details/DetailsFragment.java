@@ -94,7 +94,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
 
         setupViewModel(mId);
 
-        observeMovies();
+        observeMovie();
 
         observeFavourite();
 
@@ -142,7 +142,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 
-    private void observeMovies() {
+    private void observeMovie() {
         mViewModel.getMovie().observe(this, new Observer<Movie>() {
             @Override
             public void onChanged(@Nullable Movie movie) {
