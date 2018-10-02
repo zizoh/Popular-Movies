@@ -64,13 +64,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public void setMovieData(List<Movie> newMovies) {
+        Timber.e("Movies don show!");
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
-//            Timber.e("Fav size: " + mMovies.size());
-//            for (int i = 0; i < mMovies.size(); i++) {
-//                Timber.e("Fav title: " + mMovies.get(i).getId() + mMovies.get(i).getTitle());
-//            }
             notifyDataSetChanged();
         } else {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {

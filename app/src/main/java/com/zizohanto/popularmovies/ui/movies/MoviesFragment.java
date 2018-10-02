@@ -35,8 +35,6 @@ import com.zizohanto.popularmovies.utils.NetworkState;
 import java.util.List;
 import java.util.Objects;
 
-import timber.log.Timber;
-
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -234,7 +232,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                     if (isFirstTimeFetch) {
                         setMoviesToAdapter(movies);
                         isFirstTimeFetch = false;
-                        Timber.e("First time movies recieved");
                     }
                 }
             }
@@ -268,8 +265,10 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mViewModel.getAllFavouriteMovies().observe(this, new Observer<List<FavouriteMovie>>() {
             @Override
             public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
-                if (favouriteMovies != null && favouriteMovies.size() != 0) {
-                    getMoviesFromFavourites(favouriteMovies);
+                if (isFavouriteView) {
+                    if (favouriteMovies != null && favouriteMovies.size() != 0) {
+                        getMoviesFromFavourites(favouriteMovies);
+                    }
                 }
             }
         });

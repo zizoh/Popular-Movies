@@ -150,12 +150,30 @@ public class MovieNetworkDataSource {
                             if (movies != null) {
                                 Timber.d("Number of movies received: %s", movies.size());
                             }
-                            mDownloadedMovies.postValue(movies);
+                            mDownloadedMovies.postValue(setMovieListType(movies));
                             networkState.postValue(NetworkState.LOADED);
                         } else {
                             Timber.d("%sUnknown error", String.valueOf(response.errorBody()));
                             networkState.postValue(new NetworkState(NetworkState.Status.FAILED, response.message()));
                         }
+                    }
+
+                    /*
+                     *  Method to set the list for which each movie was fetched from: either popular or
+                     *  top rated. This is to allow saving the same movie twice in the db as a
+                     *  popular or top rated movie
+                     */
+                    private List<Movie> setMovieListType(List<Movie> movies) {
+                        int listType = 0;
+                        if (moviesSortType.equals("movie/popular")) {
+                            listType = 1;
+                        } else if (moviesSortType.equals("movie/top_rated")) {
+                            listType = 2;
+                        }
+                        for (int i = 0; i < movies.size(); i++) {
+                            movies.get(i).setListType(listType);
+                        }
+                        return movies;
                     }
 
                     @Override

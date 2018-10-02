@@ -71,9 +71,6 @@ public class PopularMoviesRepository {
                             deleteOldMovieData();
                             Timber.d("Old movies deleted");
                         }
-                        for (int i = 0; i < newMoviesFromNetwork.size(); i++) {
-                            newMoviesFromNetwork.get(i).setListType(mListType);
-                        }
 
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
@@ -275,7 +272,7 @@ public class PopularMoviesRepository {
         return mFavouriteMovieDao.getAllFavouriteMovies();
     }
 
-    public LiveData<FavouriteMovie> getFavouriteMovie() {
+    public LiveData<FavouriteMovie> getFavouriteMovie(int mMovieId) {
         Timber.d("Getting favourite movie with id: %s", mMovieId);
         return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId, mListType);
     }
