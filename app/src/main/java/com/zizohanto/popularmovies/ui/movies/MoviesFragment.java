@@ -35,8 +35,6 @@ import com.zizohanto.popularmovies.utils.NetworkState;
 import java.util.List;
 import java.util.Objects;
 
-import timber.log.Timber;
-
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -127,7 +125,11 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         loading(false);
         if (movies != null && movies.size() != 0) {
             mMovieAdapter.setMovieData(movies);
+            if (isFirstTimeFetch) {
+                isFirstTimeFetch = false;
+            }
         }
+
     }
 
     public void setLoadingIndicator(final boolean active) {
@@ -233,8 +235,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
                 if (!isFavouriteView) {
                     if (isFirstTimeFetch) {
                         setMoviesToAdapter(movies);
-                        isFirstTimeFetch = false;
-                        Timber.e("First time movies recieved");
                     }
                 }
             }
