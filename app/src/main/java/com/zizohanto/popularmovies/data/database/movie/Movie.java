@@ -59,6 +59,10 @@ public class Movie {
     private String releaseDate;
 
     @Ignore
+    public Movie() {
+    }
+
+    @Ignore
     public Movie(Integer id, Integer voteCount, Boolean video, Double voteAverage, String title,
                  Double popularity, String posterPath, String originalLanguage, String originalTitle,
                  List<Integer> genreIds, String backdropPath, Boolean adult, String overview, String releaseDate) {

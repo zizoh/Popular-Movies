@@ -54,6 +54,4 @@ class DetailsFragViewModel extends ViewModel {
     public void deleteFavouriteMovie() {
         mRepository.deleteFavouriteMovie();
     }
-
-
 }

@@ -13,18 +13,50 @@ public class FavouriteMovie {
     private String title;
     private Integer id;
 
-    @Ignore
-    public FavouriteMovie(String mTitle, Integer id, int listType) {
-        this.title = mTitle;
-        this.id = id;
-        this.listType = listType;
-    }
+    private Integer voteCount;
+    private Boolean video;
+    private Double voteAverage;
+    private Double popularity;
+    private String posterPath;
+    private String originalTitle;
+    private String backdropPath;
+    private String overview;
+    private String releaseDate;
 
-    public FavouriteMovie(int roomId, String title, Integer id, int listType) {
-        this.roomId = roomId;
+    @Ignore
+    public FavouriteMovie(int listType, String title, Integer id, Integer voteCount, Boolean video,
+                          Double voteAverage, Double popularity, String posterPath, String originalTitle,
+                          String backdropPath, String overview, String releaseDate) {
+        this.listType = listType;
         this.title = title;
         this.id = id;
+        this.voteCount = voteCount;
+        this.video = video;
+        this.voteAverage = voteAverage;
+        this.popularity = popularity;
+        this.posterPath = posterPath;
+        this.originalTitle = originalTitle;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+    }
+
+    public FavouriteMovie(int roomId, int listType, String title, Integer id, Integer voteCount,
+                          Boolean video, Double voteAverage, Double popularity, String posterPath,
+                          String originalTitle, String backdropPath, String overview, String releaseDate) {
+        this.roomId = roomId;
         this.listType = listType;
+        this.title = title;
+        this.id = id;
+        this.voteCount = voteCount;
+        this.video = video;
+        this.voteAverage = voteAverage;
+        this.popularity = popularity;
+        this.posterPath = posterPath;
+        this.originalTitle = originalTitle;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
     }
 
     public int getRoomId() {
@@ -53,5 +85,81 @@ public class FavouriteMovie {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public Integer getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(Integer voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    public Boolean getVideo() {
+        return video;
+    }
+
+    public void setVideo(Boolean video) {
+        this.video = video;
+    }
+
+    public Double getVoteAverage() {
+        return voteAverage;
+    }
+
+    public void setVoteAverage(Double voteAverage) {
+        this.voteAverage = voteAverage;
+    }
+
+    public Double getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(Double popularity) {
+        this.popularity = popularity;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 }

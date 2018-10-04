@@ -32,6 +32,7 @@ import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -228,18 +229,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     private void observeMovies() {
-//        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-//            @Override
-//            public void onChanged(@Nullable List<Movie> movies) {
-//                if (!isFavouriteView) {
-//                    setMoviesToAdapter(movies);
-//                    if (isFirstTimeFetch) {
-//                        isFirstTimeFetch = false;
-//                    }
-//                }
-//            }
-//        });
-
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
@@ -277,26 +266,35 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
                 if (isFavouriteView) {
                     if (favouriteMovies != null && favouriteMovies.size() != 0) {
-                        getMoviesFromFavourites(favouriteMovies);
+                        //getMoviesFromFavourites(favouriteMovies);
+                        List<Movie> movies = convertFavMoviesToMovies(favouriteMovies);
+                        setMoviesToAdapter(movies);
                     }
                 }
             }
         });
     }
 
-    private void getMoviesFromFavourites(List<FavouriteMovie> favouriteMovies) {
-        int[] ids = new int[favouriteMovies.size()];
+    private List<Movie> convertFavMoviesToMovies(List<FavouriteMovie> favouriteMovies) {
+        List<Movie> movies = new ArrayList<>();
         for (int i = 0; i < favouriteMovies.size(); i++) {
-            ids[i] = favouriteMovies.get(i).getId();
+            FavouriteMovie favouriteMovie = favouriteMovies.get(i);
+            Movie movie = new Movie();
+
+            movie.setTitle(favouriteMovie.getTitle());
+            movie.setId(favouriteMovie.getId());
+            movie.setVoteCount(favouriteMovie.getVoteCount());
+            movie.setVideo(favouriteMovie.getVideo());
+            movie.setPopularity(favouriteMovie.getPopularity());
+            movie.setPosterPath(favouriteMovie.getPosterPath());
+            movie.setOriginalTitle(favouriteMovie.getOriginalTitle());
+            movie.setBackdropPath(favouriteMovie.getBackdropPath());
+            movie.setOverview(favouriteMovie.getOverview());
+            movie.setReleaseDate(favouriteMovie.getReleaseDate());
+
+            movies.add(movie);
         }
-        mViewModel.getFavouriteMoviesByIds(ids).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
+        return movies;
     }
 
     private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {

@@ -39,6 +39,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     private int mListTpye;
     private Integer mId;
     private String mTitle;
+    private Movie mMovie;
 
     private DetailsFragBinding mDetailsFragBinding;
     private Context mContext;
@@ -184,7 +185,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
                     String synopsis = movie.getOverview();
                     mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
 
-                    mListTpye = movie.getListType();
+                    mMovie = movie;
+
                 }
             }
         });
@@ -253,7 +255,18 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     }
 
     private void saveFavourite() {
-        mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId, mListTpye));
+        mViewModel.saveFavouriteMovie(new FavouriteMovie(mMovie.getListType(),
+                mMovie.getTitle(),
+                mMovie.getId(),
+                mMovie.getVoteCount(),
+                mMovie.getVideo(),
+                mMovie.getVoteAverage(),
+                mMovie.getPopularity(),
+                mMovie.getPosterPath(),
+                mMovie.getOriginalTitle(),
+                mMovie.getBackdropPath(),
+                mMovie.getOverview(),
+                mMovie.getReleaseDate()));
     }
 
     private void deleteFavourite() {
