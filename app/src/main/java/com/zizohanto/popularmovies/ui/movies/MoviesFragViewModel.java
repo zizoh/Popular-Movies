@@ -27,9 +27,9 @@ public class MoviesFragViewModel extends ViewModel {
         return mMovies;
     }
 
-    public LiveData<List<Movie>> getCurrentMovies(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
+    public void getCurrentMovies(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
         mRepository.setFetchMoviesCriteria(moviesSortType, isNotPreferenceChange, pageToLoad);
-        return mRepository.getCurrentMovies();
+        mMovies = mRepository.getCurrentMovies();
     }
 
     public LiveData<NetworkState> getNetworkState() {

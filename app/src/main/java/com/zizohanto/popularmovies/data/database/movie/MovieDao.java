@@ -21,8 +21,11 @@ public interface MovieDao {
      * @param listType The listType you want movies for
      * @return {@link LiveData} of movies with listType specified
      */
-    @Query("SELECT * FROM movie WHERE listType == :listType")
+    @Query("SELECT * FROM movie WHERE listType = :listType")
     LiveData<List<Movie>> getMoviesByType(int listType);
+
+    @Query("SELECT * FROM movie")
+    LiveData<List<Movie>> getAllMovies();
 
     /**
      * @param ids The ids you want movies for
@@ -37,12 +40,14 @@ public interface MovieDao {
     void bulkInsert(List<Movie> movies);
 
     //
+    @Query("DELETE FROM movie")
+    void deleteAllMovies();
 
     /**
      * Deletes all movies of type specified from the database
      *
      * @param listType the type of movies to be deleted
      */
-    @Query("DELETE FROM movie WHERE listType == :listType")
+    @Query("DELETE FROM movie WHERE listType = :listType")
     void deleteMoviesByListType(int listType);
 }

@@ -16,15 +16,13 @@ import com.zizohanto.popularmovies.data.database.movie.Movie;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
     private List<Movie> mMovies;
     private Context mContext;
     private MovieItemClickListener mOnClickListener;
 
-    MovieAdapter(Context context, MovieItemClickListener listener) {
+    public MovieAdapter(Context context, MovieItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
     }
@@ -63,11 +61,60 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         holder.bind(mMovies.get(position));
     }
 
+//    public void setMovieData(List<Movie> newMovies) {
+//        // If there was no movie data, then recreate all of the list
+//        if (mMovies == null) {
+//            mMovies = newMovies;
+//            notifyDataSetChanged();
+//        } else {
+//            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+//                @Override
+//                public int getOldListSize() {
+//                    return mMovies.size();
+//                }
+//
+//                @Override
+//                public int getNewListSize() {
+//                    return newMovies.size();
+//                }
+//
+//                @Override
+//                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+//                    boolean areItemsTheSame = true;
+//                    try {
+//                        areItemsTheSame = mMovies.get(oldItemPosition).getId() ==
+//                                newMovies.get(newItemPosition).getId();
+//                    } catch (ArrayIndexOutOfBoundsException e) {
+//                        Timber.e(e.toString());
+//                    }
+//                    return areItemsTheSame;
+//                }
+//
+//                @Override
+//                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+//                    boolean contentsTheSame = true;
+//                    try {
+//                        Movie newMovie = newMovies.get(newItemPosition);
+//                        Movie oldMovie = mMovies.get(oldItemPosition);
+//
+//                        contentsTheSame = newMovie.getId() == oldMovie.getId()
+//                                && newMovie.getTitle().equals(oldMovie.getTitle());
+//                    } catch (ArrayIndexOutOfBoundsException e) {
+//                        Timber.e(e.toString());
+//                    }
+//                    return contentsTheSame;
+//                }
+//            });
+//            mMovies = newMovies;
+//            result.dispatchUpdatesTo(this);
+//        }
+//    }
+
     public void setMovieData(List<Movie> newMovies) {
+        notifyDataSetChanged();
         // If there was no movie data, then recreate all of the list
         if (mMovies == null) {
             mMovies = newMovies;
-            notifyDataSetChanged();
         } else {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
@@ -82,29 +129,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
                 @Override
                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    boolean areItemsTheSame = true;
-                    try {
-                        areItemsTheSame = mMovies.get(oldItemPosition).getId() ==
-                                newMovies.get(newItemPosition).getId();
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        Timber.e(e.toString());
-                    }
-                    return areItemsTheSame;
+                    return mMovies.get(oldItemPosition).getId() ==
+                            newMovies.get(newItemPosition).getId();
                 }
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    boolean contentsTheSame = true;
-                    try {
-                        Movie newMovie = newMovies.get(newItemPosition);
-                        Movie oldMovie = mMovies.get(oldItemPosition);
-
-                        contentsTheSame = newMovie.getId() == oldMovie.getId()
-                                && newMovie.getTitle().equals(oldMovie.getTitle());
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        Timber.e(e.toString());
-                    }
-                    return contentsTheSame;
+                    // TODO: fix ArrayIndexOutOfBound bug where adapter position is bigger than 20
+                    // cos it isn't reset when preference is changed
+                    Movie newMovie = newMovies.get(newItemPosition);
+                    Movie oldMovie = mMovies.get(oldItemPosition);
+                    return newMovie.getId() == oldMovie.getId()
+                            && newMovie.getTitle().equals(oldMovie.getTitle());
                 }
             });
             mMovies = newMovies;

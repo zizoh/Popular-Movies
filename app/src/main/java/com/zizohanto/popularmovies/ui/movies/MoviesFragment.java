@@ -35,6 +35,8 @@ import com.zizohanto.popularmovies.utils.NetworkState;
 import java.util.List;
 import java.util.Objects;
 
+import timber.log.Timber;
+
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -124,6 +126,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setMoviesToAdapter(@Nullable List<Movie> movies) {
         loading(false);
         if (movies != null && movies.size() != 0) {
+            Timber.e("First movie type: " + String.valueOf(movies.get(0).getListType()));
             mMovieAdapter.setMovieData(movies);
         }
     }
@@ -225,15 +228,22 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     private void observeMovies() {
+//        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+//            @Override
+//            public void onChanged(@Nullable List<Movie> movies) {
+//                if (!isFavouriteView) {
+//                    setMoviesToAdapter(movies);
+//                    if (isFirstTimeFetch) {
+//                        isFirstTimeFetch = false;
+//                    }
+//                }
+//            }
+//        });
+
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
-                if (!isFavouriteView) {
-                    if (isFirstTimeFetch) {
-                        setMoviesToAdapter(movies);
-                        isFirstTimeFetch = false;
-                    }
-                }
+                setMoviesToAdapter(movies);
             }
         });
     }
@@ -307,15 +317,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     }
 
     private void getMovies() {
-        //isNotFirstTimeFetch = false;
-        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (!isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
+        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
     }
 
     private void showSortingPopUpMenu() {

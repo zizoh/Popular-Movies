@@ -144,7 +144,8 @@ public class PopularMoviesRepository {
      * Deletes old movies data after new movies are fetched successfully
      */
     private void deleteOldMovieData() {
-        mMovieDao.deleteMoviesByListType(mListType);
+//        mMovieDao.deleteMoviesByListType(mListType);
+        mMovieDao.deleteAllMovies();
     }
 
     /**
@@ -206,7 +207,8 @@ public class PopularMoviesRepository {
         });
     }
 
-    public void setFetchMoviesCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
+    public void setFetchMoviesCriteria(String moviesSortType, Boolean isNotPreferenceChange,
+                                       int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
@@ -231,7 +233,8 @@ public class PopularMoviesRepository {
      */
     public LiveData<List<Movie>> getCurrentMovies() {
         initializeData();
-        return mMovieDao.getMoviesByType(mListType);
+//        return mMovieDao.getMoviesByType(mListType);
+        return mMovieDao.getAllMovies();
     }
 
     public LiveData<Movie> getMovie() {
