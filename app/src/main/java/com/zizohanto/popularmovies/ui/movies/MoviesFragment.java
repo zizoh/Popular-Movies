@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import timber.log.Timber;
-
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -127,7 +125,6 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     private void setMoviesToAdapter(@Nullable List<Movie> movies) {
         loading(false);
         if (movies != null && movies.size() != 0) {
-            Timber.e("First movie type: " + String.valueOf(movies.get(0).getListType()));
             mMovieAdapter.setMovieData(movies);
         }
     }
@@ -194,6 +191,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mMoviesSortType = mSharedPreference.getString(getString(R.string.pref_key_sort_by),
                 getString(R.string.pref_sort_by_popularity_value));
 
+        isFavouriteView = false;
+
         if (mMoviesSortType.equals(getString(R.string.pref_sort_by_popularity_value))) {
             mCurrentSortType = MoviesSortType.POPULAR_MOVIES;
         } else if (mMoviesSortType.equals(getString(R.string.pref_sort_by_top_rated_value))) {
@@ -232,7 +231,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
-                setMoviesToAdapter(movies);
+                if (!isFavouriteView) {
+                    setMoviesToAdapter(movies);
+                }
             }
         });
     }

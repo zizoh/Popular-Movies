@@ -18,7 +18,7 @@ class DetailsFragViewModel extends ViewModel {
     private final LiveData<List<Video>> mVideos;
     private final LiveData<List<Review>> mRevies;
     private final LiveData<FavouriteMovie> mFavouriteMovie;
-    private final Integer mId;
+    private Integer mId;
 
     public DetailsFragViewModel(PopularMoviesRepository repository, Integer id) {
         mRepository = repository;

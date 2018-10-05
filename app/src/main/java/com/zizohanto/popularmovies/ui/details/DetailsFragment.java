@@ -87,6 +87,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
+
         mDetailsFragBinding.clDetailsFragTop.cbFavourite.setOnClickListener(this);
 
         setUpVideosView();
@@ -197,6 +198,42 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onChanged(@Nullable FavouriteMovie favouriteMovie) {
                 if (favouriteMovie != null) {
+                    String posterUrl = favouriteMovie.getPosterPath();
+                    Picasso.with(mContext)
+                            .load(buildCompleteBackdropUrl(posterUrl))
+                            .error(mContext.getResources().getDrawable(R.drawable.no_image))
+                            .placeholder(mContext.getResources().getDrawable(R.drawable
+                                    .im_poster_placeholder))
+                            .into(mDetailsFragBinding.clDetailsFragTop.ivBackdropImage);
+
+                    mTitle = favouriteMovie.getTitle();
+                    mDetailsFragBinding.clDetailsFragTop.tvTitle.setText(mTitle);
+
+                    LayerDrawable layerDrawable = (LayerDrawable) mDetailsFragBinding
+                            .clDetailsFragTop.rating.getProgressDrawable();
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(0)),
+                            Color.WHITE);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(1)),
+                            Color.YELLOW);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(2)),
+                            Color.YELLOW);
+
+                    Double voteAverage = favouriteMovie.getVoteAverage();
+                    float d = (float) (voteAverage / 2);
+
+                    mDetailsFragBinding.clDetailsFragTop.rating.setRating(d);
+
+                    String popularity = String.valueOf(favouriteMovie.getPopularity());
+                    mDetailsFragBinding.clDetailsFragTop.tvPopularity.setText(
+                            String.format("(%s)", popularity));
+
+                    String releaseDate = favouriteMovie.getReleaseDate();
+                    String releaseYear = releaseDate.substring(0, 4);
+                    mDetailsFragBinding.clDetailsFragTop.tvReleaseYear.setText(String
+                            .format("Released: %s", releaseYear));
+
+                    String synopsis = favouriteMovie.getOverview();
+                    mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
                     mDetailsFragBinding.clDetailsFragTop.cbFavourite.setChecked(true);
                 }
             }
