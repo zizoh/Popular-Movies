@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -89,8 +90,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         // Set up movies view
         mRecyclerView = mMoviesFragBinding.rvMovies;
 
-        mLayoutManager = new GridLayoutManager(mContext, 2);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        getLayoutManager();
+
+        mRecyclerView.setLayoutManager(getLayoutManager());
 
         mContext = getActivity();
 
@@ -119,6 +121,16 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         return root;
     }
+
+    private GridLayoutManager getLayoutManager() {
+        if (this.mRecyclerView.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mLayoutManager = new GridLayoutManager(mContext, 2);
+        } else if (this.mRecyclerView.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mLayoutManager = new GridLayoutManager(mContext, 4);
+        }
+        return mLayoutManager;
+    }
+
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
