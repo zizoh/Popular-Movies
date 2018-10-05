@@ -2,7 +2,6 @@ package com.zizohanto.popularmovies.ui.details;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -271,9 +270,10 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(youtubeVideoUrl));
-        try {
+
+        if (appIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
+        } else {
             startActivity(webIntent);
         }
     }
