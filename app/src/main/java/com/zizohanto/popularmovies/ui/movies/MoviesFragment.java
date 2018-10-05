@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -39,6 +40,7 @@ import java.util.Objects;
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String KEY_LIST_POSITION = "LIST_POSITION";
     private static final String KEY_PAGE_TO_LOAD = "PAGE_TO_LOAD";
     private static final String KEY_IS_LOADING = "IS_LOADING";
     private static final String KEY_IS_FIRST_TIME_FETCH = "IS_FIRST_TIME_FETCH";
@@ -47,15 +49,18 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     private int mPageToLoad = 1;
     private boolean isFirstTimeFetch;
+    private boolean isMoreMoviesFetch;
     private boolean isLoading;
     private boolean isFavouriteView;
     private String mMoviesSortType;
+    private Parcelable mListState;
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private MovieAdapter mMovieAdapter;
     private MoviesFragViewModel mViewModel;
     private RecyclerView mRecyclerView;
+    private GridLayoutManager mLayoutManager;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
     private SharedPreferences mSharedPreference;
 
@@ -84,8 +89,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         // Set up movies view
         mRecyclerView = mMoviesFragBinding.rvMovies;
 
-        GridLayoutManager layoutManager = new GridLayoutManager(mContext, 2);
-        mRecyclerView.setLayoutManager(layoutManager);
+        mLayoutManager = new GridLayoutManager(mContext, 2);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         mContext = getActivity();
 
@@ -94,14 +99,16 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         setProgressIndicator();
         setHasOptionsMenu(true);
-        setScrollListener(layoutManager);
+        setScrollListener(mLayoutManager);
 
         isFirstTimeFetch = true;
 
         if (savedInstanceState != null) {
             mPageToLoad = savedInstanceState.getInt(KEY_PAGE_TO_LOAD);
+            mListState = savedInstanceState.getParcelable(KEY_LIST_POSITION);
             isLoading = savedInstanceState.getBoolean(KEY_IS_LOADING);
             isFirstTimeFetch = savedInstanceState.getBoolean(KEY_IS_FIRST_TIME_FETCH);
+
         }
         setupSharedPreferences();
         setActionBarTitle();
@@ -116,6 +123,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(KEY_PAGE_TO_LOAD, mPageToLoad);
+        outState.putParcelable(KEY_LIST_POSITION, mLayoutManager.onSaveInstanceState());
         outState.putBoolean(KEY_IS_LOADING, isLoading);
         outState.putBoolean(KEY_IS_FIRST_TIME_FETCH, isFirstTimeFetch);
 
@@ -126,6 +134,12 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         loading(false);
         if (movies != null && movies.size() != 0) {
             mMovieAdapter.setMovieData(movies);
+            if (mListState != null) {
+                if (!isMoreMoviesFetch) {
+                    mLayoutManager.onRestoreInstanceState(mListState);
+                }
+                isMoreMoviesFetch = false;
+            }
         }
     }
 
@@ -312,6 +326,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     private void fetchMoreMovies() {
         loading(true);
+        isMoreMoviesFetch = true;
         getMovies();
     }
 
