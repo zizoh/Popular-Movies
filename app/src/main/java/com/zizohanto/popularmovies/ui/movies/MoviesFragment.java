@@ -5,8 +5,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,12 +34,14 @@ import com.zizohanto.popularmovies.ui.details.DetailsActivity;
 import com.zizohanto.popularmovies.utils.InjectorUtils;
 import com.zizohanto.popularmovies.utils.NetworkState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String KEY_LIST_POSITION = "LIST_POSITION";
     private static final String KEY_PAGE_TO_LOAD = "PAGE_TO_LOAD";
     private static final String KEY_IS_LOADING = "IS_LOADING";
     private static final String KEY_IS_FIRST_TIME_FETCH = "IS_FIRST_TIME_FETCH";
@@ -46,15 +50,18 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     private int mPageToLoad = 1;
     private boolean isFirstTimeFetch;
+    private boolean isMoreMoviesFetch;
     private boolean isLoading;
     private boolean isFavouriteView;
     private String mMoviesSortType;
+    private Parcelable mListState;
 
     private Context mContext;
     private MoviesFragBinding mMoviesFragBinding;
     private MovieAdapter mMovieAdapter;
     private MoviesFragViewModel mViewModel;
     private RecyclerView mRecyclerView;
+    private GridLayoutManager mLayoutManager;
     private ScrollChildSwipeRefreshLayout mSwipeRefreshLayout;
     private SharedPreferences mSharedPreference;
 
@@ -83,8 +90,9 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         // Set up movies view
         mRecyclerView = mMoviesFragBinding.rvMovies;
 
-        GridLayoutManager layoutManager = new GridLayoutManager(mContext, 2);
-        mRecyclerView.setLayoutManager(layoutManager);
+        getLayoutManager();
+
+        mRecyclerView.setLayoutManager(getLayoutManager());
 
         mContext = getActivity();
 
@@ -93,14 +101,16 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
         setProgressIndicator();
         setHasOptionsMenu(true);
-        setScrollListener(layoutManager);
+        setScrollListener(mLayoutManager);
 
         isFirstTimeFetch = true;
 
         if (savedInstanceState != null) {
             mPageToLoad = savedInstanceState.getInt(KEY_PAGE_TO_LOAD);
+            mListState = savedInstanceState.getParcelable(KEY_LIST_POSITION);
             isLoading = savedInstanceState.getBoolean(KEY_IS_LOADING);
             isFirstTimeFetch = savedInstanceState.getBoolean(KEY_IS_FIRST_TIME_FETCH);
+
         }
         setupSharedPreferences();
         setActionBarTitle();
@@ -112,9 +122,20 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         return root;
     }
 
+    private GridLayoutManager getLayoutManager() {
+        if (this.mRecyclerView.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mLayoutManager = new GridLayoutManager(mContext, 2);
+        } else if (this.mRecyclerView.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mLayoutManager = new GridLayoutManager(mContext, 4);
+        }
+        return mLayoutManager;
+    }
+
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(KEY_PAGE_TO_LOAD, mPageToLoad);
+        outState.putParcelable(KEY_LIST_POSITION, mLayoutManager.onSaveInstanceState());
         outState.putBoolean(KEY_IS_LOADING, isLoading);
         outState.putBoolean(KEY_IS_FIRST_TIME_FETCH, isFirstTimeFetch);
 
@@ -125,11 +146,13 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         loading(false);
         if (movies != null && movies.size() != 0) {
             mMovieAdapter.setMovieData(movies);
-            if (isFirstTimeFetch) {
-                isFirstTimeFetch = false;
+            if (mListState != null) {
+                if (!isMoreMoviesFetch) {
+                    mLayoutManager.onRestoreInstanceState(mListState);
+                }
+                isMoreMoviesFetch = false;
             }
         }
-
     }
 
     public void setLoadingIndicator(final boolean active) {
@@ -194,6 +217,8 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mMoviesSortType = mSharedPreference.getString(getString(R.string.pref_key_sort_by),
                 getString(R.string.pref_sort_by_popularity_value));
 
+        isFavouriteView = false;
+
         if (mMoviesSortType.equals(getString(R.string.pref_sort_by_popularity_value))) {
             mCurrentSortType = MoviesSortType.POPULAR_MOVIES;
         } else if (mMoviesSortType.equals(getString(R.string.pref_sort_by_top_rated_value))) {
@@ -233,9 +258,7 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
                 if (!isFavouriteView) {
-                    if (isFirstTimeFetch) {
-                        setMoviesToAdapter(movies);
-                    }
+                    setMoviesToAdapter(movies);
                 }
             }
         });
@@ -268,26 +291,37 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
         mViewModel.getAllFavouriteMovies().observe(this, new Observer<List<FavouriteMovie>>() {
             @Override
             public void onChanged(@Nullable List<FavouriteMovie> favouriteMovies) {
-                if (favouriteMovies != null && favouriteMovies.size() != 0) {
-                    getMoviesFromFavourites(favouriteMovies);
+                if (isFavouriteView) {
+                    if (favouriteMovies != null && favouriteMovies.size() != 0) {
+                        //getMoviesFromFavourites(favouriteMovies);
+                        List<Movie> movies = convertFavMoviesToMovies(favouriteMovies);
+                        setMoviesToAdapter(movies);
+                    }
                 }
             }
         });
     }
 
-    private void getMoviesFromFavourites(List<FavouriteMovie> favouriteMovies) {
-        int[] ids = new int[favouriteMovies.size()];
+    private List<Movie> convertFavMoviesToMovies(List<FavouriteMovie> favouriteMovies) {
+        List<Movie> movies = new ArrayList<>();
         for (int i = 0; i < favouriteMovies.size(); i++) {
-            ids[i] = favouriteMovies.get(i).getId();
+            FavouriteMovie favouriteMovie = favouriteMovies.get(i);
+            Movie movie = new Movie();
+
+            movie.setTitle(favouriteMovie.getTitle());
+            movie.setId(favouriteMovie.getId());
+            movie.setVoteCount(favouriteMovie.getVoteCount());
+            movie.setVideo(favouriteMovie.getVideo());
+            movie.setPopularity(favouriteMovie.getPopularity());
+            movie.setPosterPath(favouriteMovie.getPosterPath());
+            movie.setOriginalTitle(favouriteMovie.getOriginalTitle());
+            movie.setBackdropPath(favouriteMovie.getBackdropPath());
+            movie.setOverview(favouriteMovie.getOverview());
+            movie.setReleaseDate(favouriteMovie.getReleaseDate());
+
+            movies.add(movie);
         }
-        mViewModel.getFavouriteMoviesByIds(ids).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
+        return movies;
     }
 
     private boolean isMoreFetchNeeded(int visibleItemCount, int totalItemCount, int firstVisibleItemPosition) {
@@ -304,19 +338,13 @@ public class MoviesFragment extends Fragment implements MovieAdapter.MovieItemCl
 
     private void fetchMoreMovies() {
         loading(true);
+        isMoreMoviesFetch = true;
+        isFirstTimeFetch = false;
         getMovies();
     }
 
     private void getMovies() {
-        //isNotFirstTimeFetch = false;
-        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad).observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (!isFavouriteView) {
-                    setMoviesToAdapter(movies);
-                }
-            }
-        });
+        mViewModel.getCurrentMovies(mMoviesSortType, false, mPageToLoad);
     }
 
     private void showSortingPopUpMenu() {
