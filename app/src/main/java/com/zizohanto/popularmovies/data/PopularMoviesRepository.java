@@ -71,9 +71,6 @@ public class PopularMoviesRepository {
                             deleteOldMovieData();
                             Timber.d("Old movies deleted");
                         }
-                        for (int i = 0; i < newMoviesFromNetwork.size(); i++) {
-                            newMoviesFromNetwork.get(i).setListType(mListType);
-                        }
 
                         // Insert our new movie data into PopularMovie's database
                         mMovieDao.bulkInsert(newMoviesFromNetwork);
@@ -147,7 +144,8 @@ public class PopularMoviesRepository {
      * Deletes old movies data after new movies are fetched successfully
      */
     private void deleteOldMovieData() {
-        mMovieDao.deleteMoviesByListType(mListType);
+//        mMovieDao.deleteMoviesByListType(mListType);
+        mMovieDao.deleteAllMovies();
     }
 
     /**
@@ -209,7 +207,8 @@ public class PopularMoviesRepository {
         });
     }
 
-    public void setFetchMoviesCriteria(String moviesSortType, Boolean isNotPreferenceChange, int pageToLoad) {
+    public void setFetchMoviesCriteria(String moviesSortType, Boolean isNotPreferenceChange,
+                                       int pageToLoad) {
         mMoviesSortType = moviesSortType;
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
@@ -234,7 +233,8 @@ public class PopularMoviesRepository {
      */
     public LiveData<List<Movie>> getCurrentMovies() {
         initializeData();
-        return mMovieDao.getMoviesByType(mListType);
+//        return mMovieDao.getMoviesByType(mListType);
+        return mMovieDao.getAllMovies();
     }
 
     public LiveData<Movie> getMovie() {
@@ -277,7 +277,7 @@ public class PopularMoviesRepository {
 
     public LiveData<FavouriteMovie> getFavouriteMovie() {
         Timber.d("Getting favourite movie with id: %s", mMovieId);
-        return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId, mListType);
+        return mFavouriteMovieDao.getFavouriteMovieWithId(mMovieId);
     }
 
     public void saveFavouriteMovie(FavouriteMovie favouriteMovie) {

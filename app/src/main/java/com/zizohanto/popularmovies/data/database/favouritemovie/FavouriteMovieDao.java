@@ -18,8 +18,8 @@ public interface FavouriteMovieDao {
      * @param id The id you want movie for
      * @return {@link LiveData} of movie with id specified
      */
-    @Query("SELECT * FROM favouritemovie WHERE id = :id AND listType = :listType")
-    LiveData<FavouriteMovie> getFavouriteMovieWithId(int id, int listType);
+    @Query("SELECT * FROM favouritemovie WHERE id = :id")
+    LiveData<FavouriteMovie> getFavouriteMovieWithId(int id);
 
     // Inserts favourite movie
     @Insert(onConflict = OnConflictStrategy.REPLACE)

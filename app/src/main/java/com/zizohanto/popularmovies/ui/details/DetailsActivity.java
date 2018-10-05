@@ -19,7 +19,7 @@ public class DetailsActivity extends AppCompatActivity {
         addFragmentToActivity(id);
     }
 
-    private void addFragmentToActivity(Integer id) {
+    private void addFragmentToActivity(int id) {
         Bundle bundle = new Bundle();
         bundle.putInt(MOVIE_ID_EXTRA, id);
 

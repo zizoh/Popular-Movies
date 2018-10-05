@@ -2,7 +2,6 @@ package com.zizohanto.popularmovies.ui.details;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -39,6 +38,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     private int mListTpye;
     private Integer mId;
     private String mTitle;
+    private Movie mMovie;
 
     private DetailsFragBinding mDetailsFragBinding;
     private Context mContext;
@@ -86,6 +86,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             mId = getArguments().getInt(MOVIE_ID_EXTRA, 0);
         }
 
+
         mDetailsFragBinding.clDetailsFragTop.cbFavourite.setOnClickListener(this);
 
         setUpVideosView();
@@ -94,7 +95,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
 
         setupViewModel(mId);
 
-        observeMovies();
+        observeMovie();
 
         observeFavourite();
 
@@ -142,7 +143,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         mViewModel = ViewModelProviders.of(this, factory).get(DetailsFragViewModel.class);
     }
 
-    private void observeMovies() {
+    private void observeMovie() {
         mViewModel.getMovie().observe(this, new Observer<Movie>() {
             @Override
             public void onChanged(@Nullable Movie movie) {
@@ -184,7 +185,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
                     String synopsis = movie.getOverview();
                     mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
 
-                    mListTpye = movie.getListType();
+                    mMovie = movie;
+
                 }
             }
         });
@@ -195,6 +197,42 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onChanged(@Nullable FavouriteMovie favouriteMovie) {
                 if (favouriteMovie != null) {
+                    String posterUrl = favouriteMovie.getPosterPath();
+                    Picasso.with(mContext)
+                            .load(buildCompleteBackdropUrl(posterUrl))
+                            .error(mContext.getResources().getDrawable(R.drawable.no_image))
+                            .placeholder(mContext.getResources().getDrawable(R.drawable
+                                    .im_poster_placeholder))
+                            .into(mDetailsFragBinding.clDetailsFragTop.ivBackdropImage);
+
+                    mTitle = favouriteMovie.getTitle();
+                    mDetailsFragBinding.clDetailsFragTop.tvTitle.setText(mTitle);
+
+                    LayerDrawable layerDrawable = (LayerDrawable) mDetailsFragBinding
+                            .clDetailsFragTop.rating.getProgressDrawable();
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(0)),
+                            Color.WHITE);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(1)),
+                            Color.YELLOW);
+                    DrawableCompat.setTint(DrawableCompat.wrap(layerDrawable.getDrawable(2)),
+                            Color.YELLOW);
+
+                    Double voteAverage = favouriteMovie.getVoteAverage();
+                    float d = (float) (voteAverage / 2);
+
+                    mDetailsFragBinding.clDetailsFragTop.rating.setRating(d);
+
+                    String popularity = String.valueOf(favouriteMovie.getPopularity());
+                    mDetailsFragBinding.clDetailsFragTop.tvPopularity.setText(
+                            String.format("(%s)", popularity));
+
+                    String releaseDate = favouriteMovie.getReleaseDate();
+                    String releaseYear = releaseDate.substring(0, 4);
+                    mDetailsFragBinding.clDetailsFragTop.tvReleaseYear.setText(String
+                            .format("Released: %s", releaseYear));
+
+                    String synopsis = favouriteMovie.getOverview();
+                    mDetailsFragBinding.clDetailsFragTop.tvPlotSynopsis.setText(synopsis);
                     mDetailsFragBinding.clDetailsFragTop.cbFavourite.setChecked(true);
                 }
             }
@@ -232,9 +270,10 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(youtubeVideoUrl));
-        try {
+
+        if (appIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
+        } else {
             startActivity(webIntent);
         }
     }
@@ -253,7 +292,18 @@ public class DetailsFragment extends Fragment implements View.OnClickListener,
     }
 
     private void saveFavourite() {
-        mViewModel.saveFavouriteMovie(new FavouriteMovie(mTitle, mId, mListTpye));
+        mViewModel.saveFavouriteMovie(new FavouriteMovie(mMovie.getListType(),
+                mMovie.getTitle(),
+                mMovie.getId(),
+                mMovie.getVoteCount(),
+                mMovie.getVideo(),
+                mMovie.getVoteAverage(),
+                mMovie.getPopularity(),
+                mMovie.getPosterPath(),
+                mMovie.getOriginalTitle(),
+                mMovie.getBackdropPath(),
+                mMovie.getOverview(),
+                mMovie.getReleaseDate()));
     }
 
     private void deleteFavourite() {
