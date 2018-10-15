@@ -213,9 +213,9 @@ public class PopularMoviesRepository {
         mIsNotPreferenceChange = isNotPreferenceChange;
         mPageToLoad = pageToLoad;
 
-        if (mMoviesSortType.equals("movie/popular")) {
+        if (mMoviesSortType.equals("popular")) {
             mListType = 1;
-        } else if (mMoviesSortType.equals("movie/top_rated")) {
+        } else if (mMoviesSortType.equals("top_rated")) {
             mListType = 2;
         }
     }

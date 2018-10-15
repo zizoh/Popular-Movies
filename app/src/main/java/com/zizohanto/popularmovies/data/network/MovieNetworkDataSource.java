@@ -138,9 +138,7 @@ public class MovieNetworkDataSource {
                 networkState.postValue(NetworkState.LOADING);
 
                 ApiInterface apiService = ApiClient.getClient();
-                Call<MovieResponse> call;
-
-                call = getMovieResponseCall(apiService, moviesSortType, pageToLoad);
+                Call<MovieResponse> call = apiService.getMovies(moviesSortType, API_KEY, pageToLoad);
                 call.enqueue(new Callback<MovieResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
@@ -165,9 +163,9 @@ public class MovieNetworkDataSource {
                      */
                     private List<Movie> setMovieListType(List<Movie> movies) {
                         int listType = 0;
-                        if (moviesSortType.equals("movie/popular")) {
+                        if (moviesSortType.equals("popular")) {
                             listType = 1;
-                        } else if (moviesSortType.equals("movie/top_rated")) {
+                        } else if (moviesSortType.equals("top_rated")) {
                             listType = 2;
                         }
                         for (int i = 0; i < movies.size(); i++) {
@@ -185,18 +183,6 @@ public class MovieNetworkDataSource {
             }
         });
     }
-
-    private Call<MovieResponse> getMovieResponseCall(ApiInterface apiService,
-                                                     @NonNull String moviesSortType, int pageToLoad) {
-        Call<MovieResponse> call;
-        if (moviesSortType.equals("movie/popular")) {
-            call = apiService.getPopularMovies(API_KEY, pageToLoad);
-        } else {
-            call = apiService.getTopRatedMovies(API_KEY, pageToLoad);
-        }
-        return call;
-    }
-
 
     /**
      * Get videos
